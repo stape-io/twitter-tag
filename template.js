@@ -31,9 +31,23 @@ if (url) {
     }
 }
 
-let postUrl = 'https://ads-api.twitter.com/11/measurement/conversions/'+enc(data.pixelId);
+const containerKey = data.containerKey.split(':');
+const containerZone = containerKey[0];
+const containerIdentifier = containerKey[1];
+const containerApiKey = containerKey[2];
+
+let postUrl = 'https://'+enc(containerIdentifier)+'.'+enc(containerZone)+'.stape.io/stape-api/'+enc(containerApiKey)+'/v1/twitter/auth-proxy';
 const mappedEventData = mapEvent(eventData, data);
-const postBody = {conversions: [mappedEventData]};
+const postBody = {
+    pixel_id: data.pixelId,
+    auth: {
+        "consumer_key": data.consumerKey,
+        "consumer_secret": data.consumerSecret,
+        "oauth_token": data.oauthToken,
+        "oauth_token_secret": data.oauthTokenSecret,
+    },
+    conversions: [mappedEventData],
+};
 
 if (isLoggingEnabled) {
     logToConsole(JSON.stringify({

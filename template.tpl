@@ -31,15 +31,60 @@ ___TEMPLATE_PARAMETERS___
 [
   {
     "type": "TEXT",
-    "name": "accessToken",
-    "displayName": "Access Token",
+    "name": "containerKey",
+    "displayName": "Stape Container API Key",
     "simpleValueType": true,
     "valueValidators": [
       {
         "type": "NON_EMPTY"
       }
     ],
-    "help": "Set to your Twitter API Access Token. See \u003ca href\u003d\"https://developer.twitter.com/en/docs/twitter-ads-api/measurement/web-conversions/conversion-api\" target\u003d\"_blank\"\u003ehere\u003c/a\u003e for more information."
+    "help": "It can be found in the detailed view of the container inside your \u003ca href\u003d\"https://app.stape.io/container/\" target\u003d\"_blank\"\u003eStape account\u003c/a\u003e.\n\u003cbr\u003e\u003cbr\u003e\nBecause of how Twitter Conversion API authentication works, it can\u0027t be fully functional on sGTM. That\u0027s why this tag requires working on \u003ca href\u003d\"https://stape.io/gtm-server-hosting\" target\u003d\"_blank\"\u003eStape hosting\u003c/a\u003e.\n\u003cbr\u003e\nIf it will be possible in the future to use only sGTM for authentication we will update this tag to support any hosting."
+  },
+  {
+    "type": "TEXT",
+    "name": "consumerKey",
+    "displayName": "Consumer Key",
+    "simpleValueType": true,
+    "valueValidators": [
+      {
+        "type": "NON_EMPTY"
+      }
+    ],
+    "help": "Set to your Twitter APP Consumer Key. See \u003ca href\u003d\"https://developer.twitter.com/en/docs/twitter-ads-api/measurement/web-conversions/conversion-api\" target\u003d\"_blank\"\u003ehere\u003c/a\u003e for more information."
+  },
+  {
+    "type": "TEXT",
+    "name": "consumerSecret",
+    "displayName": "Consumer Secret",
+    "simpleValueType": true,
+    "valueValidators": [
+      {
+        "type": "NON_EMPTY"
+      }
+    ]
+  },
+  {
+    "type": "TEXT",
+    "name": "oauthToken",
+    "displayName": "OAuth Token",
+    "simpleValueType": true,
+    "valueValidators": [
+      {
+        "type": "NON_EMPTY"
+      }
+    ]
+  },
+  {
+    "type": "TEXT",
+    "name": "oauthTokenSecret",
+    "displayName": "OAuth Token Secret",
+    "simpleValueType": true,
+    "valueValidators": [
+      {
+        "type": "NON_EMPTY"
+      }
+    ]
   },
   {
     "type": "TEXT",
@@ -246,9 +291,23 @@ if (url) {
     }
 }
 
-let postUrl = 'https://ads-api.twitter.com/11/measurement/conversions/'+enc(data.pixelId);
+const containerKey = data.containerKey.split(':');
+const containerZone = containerKey[0];
+const containerIdentifier = containerKey[1];
+const containerApiKey = containerKey[2];
+
+let postUrl = 'https://'+enc(containerIdentifier)+'.'+enc(containerZone)+'.stape.io/stape-api/'+enc(containerApiKey)+'/v1/twitter/auth-proxy';
 const mappedEventData = mapEvent(eventData, data);
-const postBody = {conversions: [mappedEventData]};
+const postBody = {
+    pixel_id: data.pixelId,
+    auth: {
+        "consumer_key": data.consumerKey,
+        "consumer_secret": data.consumerSecret,
+        "oauth_token": data.oauthToken,
+        "oauth_token_secret": data.oauthTokenSecret,
+    },
+    conversions: [mappedEventData],
+};
 
 if (isLoggingEnabled) {
     logToConsole(JSON.stringify({
@@ -762,7 +821,7 @@ ___SERVER_PERMISSIONS___
             "listItem": [
               {
                 "type": 1,
-                "string": "https://ads-api.twitter.com/"
+                "string": "https://*.stape.io/"
               }
             ]
           }
@@ -784,6 +843,6 @@ scenarios: []
 
 ___NOTES___
 
-Created on 12/08/2022, 18:13:10
+Created on 18/08/2022, 12:25:26
 
 
