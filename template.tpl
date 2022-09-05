@@ -515,9 +515,15 @@ function addEcommerceData(eventData, mappedData) {
 }
 
 function addUserData(eventData, mappedData) {
-    if (eventData.email) mappedData.user_data.em = eventData.email;
-    else if (eventData.user_data && eventData.user_data.email_address) mappedData.user_data.em = eventData.user_data.email_address;
-    else if (eventData.user_data && eventData.user_data.email) mappedData.user_data.em = eventData.user_data.email;
+    let hashedEmail;
+
+    if (eventData.email) hashedEmail = eventData.email;
+    else if (eventData.user_data && eventData.user_data.email_address) hashedEmail = eventData.user_data.email_address;
+    else if (eventData.user_data && eventData.user_data.email) hashedEmail = eventData.user_data.email;
+
+    if (hashedEmail) {
+        mappedData.identifiers.push({'hashed_email': hashedEmail});
+    }
 
     return mappedData;
 }
