@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 001d440bed3c7bc79b0a54bcf33df2eddde99b24
+    changeNotes: Fix permissions
   - sha: 0b34db5b95dc7736bbe9bf7db12dc1fdbb5eaf28
     changeNotes: Support of new api keys
   - sha: 6c6cc5c259b9f9e561b804af56ed197adaea6a73
