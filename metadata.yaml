@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 0b34db5b95dc7736bbe9bf7db12dc1fdbb5eaf28
+    changeNotes: Support of new api keys
   - sha: 6c6cc5c259b9f9e561b804af56ed197adaea6a73
     changeNotes: hashed_email parsing update.
   - sha: cd535822ed01c60a550ca7d51465ad61c8d806eb
