@@ -295,13 +295,16 @@ const containerKey = data.containerKey.split(':');
 const containerZone = containerKey[0];
 const containerIdentifier = containerKey[1];
 const containerApiKey = containerKey[2];
+const containerDefaultDomainEnd = containerKey[3] || 'io';
 
 let postUrl =
   'https://' +
   enc(containerIdentifier) +
   '.' +
   enc(containerZone) +
-  '.stape.io/stape-api/' +
+  '.stape.' +
+  enc(containerDefaultDomainEnd) +
+  '/stape-api/' +
   enc(containerApiKey) +
   '/v1/twitter/auth-proxy';
 const mappedEventData = mapEvent(eventData, data);
