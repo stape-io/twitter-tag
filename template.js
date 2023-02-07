@@ -245,6 +245,8 @@ function addEcommerceData(eventData, mappedData) {
   let numItems = 0;
 
   if (eventData.items && eventData.items[0]) {
+    mappedData.custom_data = {};
+    mappedData.contents = [];
     mappedData.custom_data.contents = {};
     currencyFromItems = eventData.items[0].currency;
 
