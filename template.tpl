@@ -209,6 +209,10 @@ ___TEMPLATE_PARAMETERS___
               {
                 "value": "twclid",
                 "displayValue": "twclid"
+              },
+              {
+                "value": "hashed_phone_number",
+                "displayValue": "Phone"
               }
             ]
           },
@@ -439,6 +443,12 @@ function hashDataIfNeeded(mappedData) {
           mappedData.identifiers[key]['hashed_email']
         );
       }
+
+      if (mappedData.identifiers[key]['hashed_phone_number']) {
+        mappedData.identifiers[key]['hashed_phone_number'] = hashData(
+          mappedData.identifiers[key]['hashed_phone_number']
+        );
+      }
     }
   }
 
@@ -483,6 +493,12 @@ function cleanupData(mappedData) {
       if (mappedData.identifiers[userDataKey]['hashed_email']) {
         userData.push({
           hashed_email: mappedData.identifiers[userDataKey]['hashed_email'],
+        });
+      }
+
+      if (mappedData.identifiers[userDataKey]['hashed_phone_number']) {
+        userData.push({
+          hashed_phone_number: mappedData.identifiers[userDataKey]['hashed_phone_number'],
         });
       }
 
@@ -555,6 +571,7 @@ function addEcommerceData(eventData, mappedData) {
 
 function addUserData(eventData, mappedData) {
   let hashedEmail;
+  let hashedPhoneNumber;
 
   if (eventData.email) hashedEmail = eventData.email;
   else if (eventData.user_data && eventData.user_data.email_address)
@@ -564,6 +581,16 @@ function addUserData(eventData, mappedData) {
 
   if (hashedEmail) {
     mappedData.identifiers.push({ hashed_email: hashedEmail });
+  }
+
+  if (eventData.phone) hashedPhoneNumber = eventData.phone;
+  else if (eventData.user_data && eventData.user_data.phone_number)
+    hashedPhoneNumber = eventData.user_data.phone_number;
+  else if (eventData.user_data && eventData.user_data.phone)
+    hashedPhoneNumber = eventData.user_data.phone;
+
+  if (hashedPhoneNumber) {
+    mappedData.identifiers.push({ hashed_phone_number: hashedPhoneNumber });
   }
 
   return mappedData;
