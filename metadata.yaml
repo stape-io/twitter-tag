@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 9c70bc919302607102e57dbfc448532307a0d429
+    changeNotes: Add phone option.
   - sha: 92ff5dc8ddd700649a609f18eee8f90d55d7d8e0
     changeNotes: Fix events with item details.
   - sha: 001d440bed3c7bc79b0a54bcf33df2eddde99b24
