@@ -345,7 +345,19 @@ if (isLoggingEnabled) {
     })
   );
 }
+const coockieOptions = {
+  domain: 'auto',
+  path: '/',
+  samesite: 'Lax',
+  secure: true,
+  'max-age': 7776000, // 90 days
+  HttpOnly: !!data.useHttpOnlyCookie,
+};
 
+
+if (twclid) {
+  setCookie('twclid', twclid, coockieOptions);
+}
 sendHttpRequest(
   postUrl,
   (statusCode, headers, body) => {
@@ -364,22 +376,12 @@ sendHttpRequest(
         })
       );
     }
-
-    if (statusCode >= 200 && statusCode < 300) {
-      if (twclid) {
-        setCookie('twclid', twclid, {
-          domain: 'auto',
-          path: '/',
-          samesite: 'Lax',
-          secure: true,
-          'max-age': 7776000, // 90 days
-          HttpOnly: !!data.useHttpOnlyCookie,
-        });
+    if (!data.useOptimisticScenario) {
+      if (statusCode >= 200 && statusCode < 300) {
+        data.gtmOnSuccess();
+      } else {
+        data.gtmOnFailure();
       }
-
-      data.gtmOnSuccess();
-    } else {
-      data.gtmOnFailure();
     }
   },
   {
@@ -392,6 +394,9 @@ sendHttpRequest(
   JSON.stringify(postBody)
 );
 
+if (data.useOptimisticScenario) {
+  data.gtmOnSuccess();
+}
 function mapEvent(eventData, data) {
   let mappedData = {
     event_id: data.eventId,
