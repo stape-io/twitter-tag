@@ -118,6 +118,13 @@ ___TEMPLATE_PARAMETERS___
     "help": "Forbids JavaScript from accessing the cookie if enabled."
   },
   {
+    "type": "CHECKBOX",
+    "name": "useOptimisticScenario",
+    "checkboxText": "Use Optimistic Scenario",
+    "simpleValueType": true,
+    "help": "The tag will call gtmOnSuccess() without waiting for a response from the API. This will speed up sGTM response time however your tag will always return the status fired successfully even in case it is not."
+  },
+  {
     "displayName": "Server Event Data Override",
     "name": "serverEventDataListGroup",
     "groupStyle": "ZIPPY_CLOSED",
@@ -338,7 +345,19 @@ if (isLoggingEnabled) {
     })
   );
 }
+const coockieOptions = {
+  domain: 'auto',
+  path: '/',
+  samesite: 'Lax',
+  secure: true,
+  'max-age': 7776000, // 90 days
+  HttpOnly: !!data.useHttpOnlyCookie,
+};
 
+
+if (twclid) {
+  setCookie('twclid', twclid, coockieOptions);
+}
 sendHttpRequest(
   postUrl,
   (statusCode, headers, body) => {
@@ -357,22 +376,12 @@ sendHttpRequest(
         })
       );
     }
-
-    if (statusCode >= 200 && statusCode < 300) {
-      if (twclid) {
-        setCookie('twclid', twclid, {
-          domain: 'auto',
-          path: '/',
-          samesite: 'Lax',
-          secure: true,
-          'max-age': 7776000, // 90 days
-          HttpOnly: !!data.useHttpOnlyCookie,
-        });
+    if (!data.useOptimisticScenario) {
+      if (statusCode >= 200 && statusCode < 300) {
+        data.gtmOnSuccess();
+      } else {
+        data.gtmOnFailure();
       }
-
-      data.gtmOnSuccess();
-    } else {
-      data.gtmOnFailure();
     }
   },
   {
@@ -385,6 +394,9 @@ sendHttpRequest(
   JSON.stringify(postBody)
 );
 
+if (data.useOptimisticScenario) {
+  data.gtmOnSuccess();
+}
 function mapEvent(eventData, data) {
   let mappedData = {
     event_id: data.eventId,
