@@ -279,6 +279,7 @@ const getRequestHeader = require('getRequestHeader');
 const getType = require('getType');
 const makeString = require('makeString');
 const makeInteger = require('makeInteger');
+const makeNumber = require('makeNumber');
 const parseUrl = require('parseUrl');
 const setCookie = require('setCookie');
 const decodeUriComponent = require('decodeUriComponent');
@@ -345,6 +346,7 @@ if (isLoggingEnabled) {
     })
   );
 }
+
 const coockieOptions = {
   domain: 'auto',
   path: '/',
@@ -353,7 +355,6 @@ const coockieOptions = {
   'max-age': 7776000, // 90 days
   HttpOnly: !!data.useHttpOnlyCookie,
 };
-
 
 if (twclid) {
   setCookie('twclid', twclid, coockieOptions);
@@ -522,6 +523,14 @@ function cleanupData(mappedData) {
     }
 
     mappedData.identifiers = userData;
+  }
+
+  if (mappedData.value) {
+    mappedData.value = makeNumber(mappedData.value);
+
+    if (mappedData.value.toString().indexOf('.') === -1) {
+      mappedData.value = mappedData.value + '.00';
+    }
   }
 
   return mappedData;
