@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 521e6be69f54f854b965516b37928bd4caa2d165
+    changeNotes: Fix content_price parsing.
   - sha: 1b174e71a5a9f584bcb9cb5ce71bbc4951dfdbec
     changeNotes: Add value float check.
   - sha: 839ebd69def31a1cbd87333dde401a5a7bab37a0
