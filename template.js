@@ -262,6 +262,18 @@ function cleanupData(mappedData) {
     }
   }
 
+  if (mappedData.contents) {
+    for (let contentKey in mappedData.contents) {
+      if (mappedData.contents[contentKey].content_price) {
+        mappedData.contents[contentKey].content_price = makeNumber(mappedData.contents[contentKey].content_price);
+
+        if (mappedData.contents[contentKey].content_price.toString().indexOf('.') === -1) {
+          mappedData.contents[contentKey].content_price = mappedData.contents[contentKey].content_price + '.00';
+        }
+      }
+    }
+  }
+
   return mappedData;
 }
 
