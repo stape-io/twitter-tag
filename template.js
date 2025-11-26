@@ -14,115 +14,117 @@ const setCookie = require('setCookie');
 const decodeUriComponent = require('decodeUriComponent');
 const encodeUriComponent = require('encodeUriComponent');
 const getCookieValues = require('getCookieValues');
+const getTimestampMillis = require('getTimestampMillis');
+const BigQuery = require('BigQuery');
 
-const isLoggingEnabled = determinateIsLoggingEnabled();
-const traceId = isLoggingEnabled ? getRequestHeader('trace-id') : undefined;
+/*==============================================================================
+==============================================================================*/
 
 const eventData = getAllEventData();
-const url = eventData.page_location || getRequestHeader('referer');
-
-let twclid = getCookieValues('twclid')[0];
-if (!twclid) twclid = eventData.twclid;
-
-if (url) {
-  const urlParsed = parseUrl(url);
-
-  if (urlParsed && urlParsed.searchParams.twclid) {
-    twclid = decodeUriComponent(urlParsed.searchParams.twclid);
-  }
-}
-
 const containerIdentifier = getRequestHeader('x-gtm-identifier');
 const defaultDomain = getRequestHeader('x-gtm-default-domain');
 const containerApiKey = getRequestHeader('x-gtm-api-key');
-      
-let postUrl =
-  'https://' +
-  enc(containerIdentifier) +
-  '.' +
-  enc(defaultDomain) +
-  '/stape-api/' +
-  enc(containerApiKey) +
-  '/v1/twitter/auth-proxy';
-const mappedEventData = mapEvent(eventData, data);
-const postBody = {
-  pixel_id: data.pixelId,
-  auth: {
-    consumer_key: data.consumerKey,
-    consumer_secret: data.consumerSecret,
-    oauth_token: data.oauthToken,
-    oauth_token_secret: data.oauthTokenSecret,
-  },
-  conversions: [mappedEventData],
-};
+const url = eventData.page_location || getRequestHeader('referer');
 
-if (isLoggingEnabled) {
-  logToConsole(
-    JSON.stringify({
-      Name: 'Twitter',
-      Type: 'Request',
-      TraceId: traceId,
-      EventName: mappedEventData.description
-        ? mappedEventData.description
-        : mappedEventData.eventId,
-      RequestMethod: 'POST',
-      RequestUrl: postUrl,
-      RequestBody: postBody,
-    })
-  );
+checkGuardClauses();
+
+let twclid = getXClickId(url);
+
+sendRequest();
+
+if (data.useOptimisticScenario) {
+  data.gtmOnSuccess();
 }
 
-const coockieOptions = {
-  domain: 'auto',
-  path: '/',
-  samesite: 'Lax',
-  secure: true,
-  'max-age': 7776000, // 90 days
-  HttpOnly: !!data.useHttpOnlyCookie,
-};
+/*==============================================================================
+VENDOR RELATED FUNCTIONS
+==============================================================================*/
 
-if (twclid) {
-  setCookie('twclid', twclid, coockieOptions);
-}
-sendHttpRequest(
-  postUrl,
-  (statusCode, headers, body) => {
-    if (isLoggingEnabled) {
-      logToConsole(
-        JSON.stringify({
-          Name: 'Twitter',
-          Type: 'Response',
-          TraceId: traceId,
-          EventName: mappedEventData.description
-            ? mappedEventData.description
-            : mappedEventData.eventId,
-          ResponseStatusCode: statusCode,
-          ResponseHeaders: headers,
-          ResponseBody: body,
-        })
-      );
+function getXClickId(url) {
+  let clickId = getCookieValues('twclid')[0];
+  if (!clickId) clickId = eventData.twclid;
+
+  if (url) {
+    const urlParsed = parseUrl(url);
+    if (urlParsed && urlParsed.searchParams.twclid) {
+      clickId = decodeUriComponent(urlParsed.searchParams.twclid);
     }
-    if (!data.useOptimisticScenario) {
+  }
+  return clickId;
+}
+
+function sendRequest() {
+  const postUrl =
+    'https://' +
+    enc(containerIdentifier) +
+    '.' +
+    enc(defaultDomain) +
+    '/stape-api/' +
+    enc(containerApiKey) +
+    '/v1/twitter/auth-proxy';
+  const apiVersion = '12';
+  const mappedEventData = mapEvent(eventData, data);
+  const requestOptions = {
+    headers: {
+      'Content-Type': 'application/json',
+      'x-twitter-api-version': apiVersion,
+    },
+    method: 'POST',
+  };
+  const postBody = {
+    pixel_id: data.pixelId,
+    auth: {
+      consumer_key: data.consumerKey,
+      consumer_secret: data.consumerSecret,
+      oauth_token: data.oauthToken,
+      oauth_token_secret: data.oauthTokenSecret,
+    },
+    conversions: [mappedEventData],
+  };
+  const cookieOptions = {
+    domain: 'auto',
+    path: '/',
+    samesite: 'Lax',
+    secure: true,
+    'max-age': 7776000, // 90 days
+    HttpOnly: !!data.useHttpOnlyCookie,
+  };
+
+  if (twclid) {
+    setCookie('twclid', twclid, cookieOptions);
+  }
+
+  log({
+    Name: 'Twitter',
+    Type: 'Request',
+    EventName: mappedEventData.description || mappedEventData.eventId,
+    RequestMethod: 'POST',
+    RequestUrl: postUrl,
+    RequestBody: postBody,
+  });
+
+  sendHttpRequest(
+    postUrl,
+    (statusCode, headers, body) => {
+      log({
+        Name: 'Twitter',
+        Type: 'Response',
+        EventName: mappedEventData.description || mappedEventData.eventId,
+        ResponseStatusCode: statusCode,
+        ResponseHeaders: headers,
+        ResponseBody: body,
+      });
       if (statusCode >= 200 && statusCode < 300) {
         data.gtmOnSuccess();
       } else {
         data.gtmOnFailure();
       }
-    }
-  },
-  {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + data.accessToken,
     },
-    method: 'POST',
-  },
-  JSON.stringify(postBody)
-);
-
-if (data.useOptimisticScenario) {
-  data.gtmOnSuccess();
+    requestOptions,
+    JSON.stringify(postBody)
+  );
 }
+
 function mapEvent(eventData, data) {
   let mappedData = {
     event_id: data.eventId,
@@ -139,38 +141,6 @@ function mapEvent(eventData, data) {
   mappedData = hashDataIfNeeded(mappedData);
 
   return mappedData;
-}
-
-function isHashed(value) {
-  if (!value) {
-    return false;
-  }
-
-  return makeString(value).match('^[A-Fa-f0-9]{64}$') !== null;
-}
-
-function hashData(value) {
-  if (!value) {
-    return value;
-  }
-
-  const type = getType(value);
-
-  if (type === 'undefined' || value === 'undefined') {
-    return undefined;
-  }
-
-  if (type === 'object') {
-    return value;
-  }
-
-  if (isHashed(value)) {
-    return value;
-  }
-
-  value = makeString(value).trim().toLowerCase();
-
-  return sha256Sync(value, { outputEncoding: 'hex' });
 }
 
 function hashDataIfNeeded(mappedData) {
@@ -236,13 +206,26 @@ function cleanupData(mappedData) {
 
       if (mappedData.identifiers[userDataKey]['hashed_phone_number']) {
         userData.push({
-          hashed_phone_number: mappedData.identifiers[userDataKey]['hashed_phone_number'],
+          hashed_phone_number:
+            mappedData.identifiers[userDataKey]['hashed_phone_number'],
         });
       }
 
       if (mappedData.identifiers[userDataKey]['twclid']) {
         userData.push({
           twclid: mappedData.identifiers[userDataKey]['twclid'],
+        });
+      }
+
+      if (mappedData.identifiers[userDataKey]['ip_address']) {
+        userData.push({
+          ip_address: mappedData.identifiers[userDataKey]['ip_address'],
+        });
+      }
+
+      if (mappedData.identifiers[userDataKey]['user_agent']) {
+        userData.push({
+          user_agent: mappedData.identifiers[userDataKey]['user_agent'],
         });
       }
     }
@@ -261,10 +244,17 @@ function cleanupData(mappedData) {
   if (mappedData.contents) {
     for (let contentKey in mappedData.contents) {
       if (mappedData.contents[contentKey].content_price) {
-        mappedData.contents[contentKey].content_price = makeNumber(mappedData.contents[contentKey].content_price);
+        mappedData.contents[contentKey].content_price = makeNumber(
+          mappedData.contents[contentKey].content_price
+        );
 
-        if (mappedData.contents[contentKey].content_price.toString().indexOf('.') === -1) {
-          mappedData.contents[contentKey].content_price = mappedData.contents[contentKey].content_price + '.00';
+        if (
+          mappedData.contents[contentKey].content_price
+            .toString()
+            .indexOf('.') === -1
+        ) {
+          mappedData.contents[contentKey].content_price =
+            mappedData.contents[contentKey].content_price + '.00';
         }
       }
     }
@@ -370,6 +360,127 @@ function addServerEventData(eventData, data, mappedData) {
   return mappedData;
 }
 
+/*==============================================================================
+HELPERS
+==============================================================================*/
+
+function checkGuardClauses() {
+  if (!isConsentGivenOrNotRequired(data, eventData)) {
+    return data.gtmOnSuccess();
+  }
+
+  if (url && url.lastIndexOf('https://gtm-msr.appspot.com/', 0) === 0) {
+    return data.gtmOnSuccess();
+  }
+}
+
+function isHashed(value) {
+  if (!value) {
+    return false;
+  }
+
+  return makeString(value).match('^[A-Fa-f0-9]{64}$') !== null;
+}
+
+function hashData(value) {
+  if (!value) {
+    return value;
+  }
+
+  const type = getType(value);
+
+  if (type === 'undefined' || value === 'undefined') {
+    return undefined;
+  }
+
+  if (type === 'object') {
+    return value;
+  }
+
+  if (isHashed(value)) {
+    return value;
+  }
+
+  value = makeString(value).trim().toLowerCase();
+
+  return sha256Sync(value, { outputEncoding: 'hex' });
+}
+
+function enc(data) {
+  data = data || '';
+  return encodeUriComponent(data);
+}
+
+function isConsentGivenOrNotRequired(data, eventData) {
+  if (data.adStorageConsent !== 'required') return true;
+  if (eventData.consent_state) return !!eventData.consent_state.ad_storage;
+  const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110"
+  return xGaGcs[2] === '1';
+}
+
+function log(rawDataToLog) {
+  const logDestinationsHandlers = {};
+  if (determinateIsLoggingEnabled())
+    logDestinationsHandlers.console = logConsole;
+  if (determinateIsLoggingEnabledForBigQuery())
+    logDestinationsHandlers.bigQuery = logToBigQuery;
+
+  rawDataToLog.TraceId = getRequestHeader('trace-id');
+
+  const keyMappings = {
+    // No transformation for Console is needed.
+    bigQuery: {
+      Name: 'tag_name',
+      Type: 'type',
+      TraceId: 'trace_id',
+      EventName: 'event_name',
+      RequestMethod: 'request_method',
+      RequestUrl: 'request_url',
+      RequestBody: 'request_body',
+      ResponseStatusCode: 'response_status_code',
+      ResponseHeaders: 'response_headers',
+      ResponseBody: 'response_body',
+    },
+  };
+
+  for (const logDestination in logDestinationsHandlers) {
+    const handler = logDestinationsHandlers[logDestination];
+    if (!handler) continue;
+
+    const mapping = keyMappings[logDestination];
+    const dataToLog = mapping ? {} : rawDataToLog;
+
+    if (mapping) {
+      for (const key in rawDataToLog) {
+        const mappedKey = mapping[key] || key;
+        dataToLog[mappedKey] = rawDataToLog[key];
+      }
+    }
+
+    handler(dataToLog);
+  }
+}
+
+function logConsole(dataToLog) {
+  logToConsole(JSON.stringify(dataToLog));
+}
+
+function logToBigQuery(dataToLog) {
+  const connectionInfo = {
+    projectId: data.logBigQueryProjectId,
+    datasetId: data.logBigQueryDatasetId,
+    tableId: data.logBigQueryTableId,
+  };
+
+  dataToLog.timestamp = getTimestampMillis();
+
+  ['request_body', 'response_headers', 'response_body'].forEach((p) => {
+    dataToLog[p] = JSON.stringify(dataToLog[p]);
+  });
+
+  BigQuery.insert(connectionInfo, [dataToLog], { ignoreUnknownValues: true });
+}
+
 function determinateIsLoggingEnabled() {
   const containerVersion = getContainerVersion();
   const isDebug = !!(
@@ -392,7 +503,7 @@ function determinateIsLoggingEnabled() {
   return data.logType === 'always';
 }
 
-function enc(data) {
-  data = data || '';
-  return encodeUriComponent(data);
+function determinateIsLoggingEnabledForBigQuery() {
+  if (data.bigQueryLogType === 'no') return false;
+  return data.bigQueryLogType === 'always';
 }

@@ -1,4 +1,5 @@
-homepage: "https://stape.io/"
+homepage: 'https://stape.io/'
+documentation: 'https://github.com/stape-io/twitter-tag'
 versions:
   - sha: 1701089bfac706767259c5ad8d073044a3dc915e
     changeNotes: Getting Stape API key from headers.
