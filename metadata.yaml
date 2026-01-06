@@ -1,5 +1,8 @@
-homepage: "https://stape.io/"
+homepage: 'https://stape.io/'
+documentation: 'https://github.com/stape-io/twitter-tag'
 versions:
+  - sha: 9eadee9fba51122d92789a67c4ab34094a6f84b0
+    changeNotes: Added support to 'search_string' parameter.
   - sha: 1701089bfac706767259c5ad8d073044a3dc915e
     changeNotes: Getting Stape API key from headers.
   - sha: 521e6be69f54f854b965516b37928bd4caa2d165

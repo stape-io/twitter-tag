@@ -35,7 +35,7 @@ if (url) {
 const containerIdentifier = getRequestHeader('x-gtm-identifier');
 const defaultDomain = getRequestHeader('x-gtm-default-domain');
 const containerApiKey = getRequestHeader('x-gtm-api-key');
-      
+
 let postUrl =
   'https://' +
   enc(containerIdentifier) +
@@ -51,9 +51,9 @@ const postBody = {
     consumer_key: data.consumerKey,
     consumer_secret: data.consumerSecret,
     oauth_token: data.oauthToken,
-    oauth_token_secret: data.oauthTokenSecret,
+    oauth_token_secret: data.oauthTokenSecret
   },
-  conversions: [mappedEventData],
+  conversions: [mappedEventData]
 };
 
 if (isLoggingEnabled) {
@@ -67,7 +67,7 @@ if (isLoggingEnabled) {
         : mappedEventData.eventId,
       RequestMethod: 'POST',
       RequestUrl: postUrl,
-      RequestBody: postBody,
+      RequestBody: postBody
     })
   );
 }
@@ -78,7 +78,7 @@ const coockieOptions = {
   samesite: 'Lax',
   secure: true,
   'max-age': 7776000, // 90 days
-  HttpOnly: !!data.useHttpOnlyCookie,
+  HttpOnly: !!data.useHttpOnlyCookie
 };
 
 if (twclid) {
@@ -98,12 +98,19 @@ sendHttpRequest(
             : mappedEventData.eventId,
           ResponseStatusCode: statusCode,
           ResponseHeaders: headers,
-          ResponseBody: body,
+          ResponseBody: body
         })
       );
     }
+
     if (!data.useOptimisticScenario) {
-      if (statusCode >= 200 && statusCode < 300) {
+      const parsedBody = JSON.parse(body || '{}');
+      if (
+        statusCode >= 200 &&
+        statusCode < 300 &&
+        getType(parsedBody.data) === 'object' &&
+        parsedBody.data.conversions_processed
+      ) {
         data.gtmOnSuccess();
       } else {
         data.gtmOnFailure();
@@ -113,9 +120,9 @@ sendHttpRequest(
   {
     headers: {
       'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + data.accessToken,
+      Authorization: 'Bearer ' + data.accessToken
     },
-    method: 'POST',
+    method: 'POST'
   },
   JSON.stringify(postBody)
 );
@@ -126,7 +133,7 @@ if (data.useOptimisticScenario) {
 function mapEvent(eventData, data) {
   let mappedData = {
     event_id: data.eventId,
-    identifiers: [],
+    identifiers: []
   };
 
   if (twclid) mappedData.identifiers.push({ twclid: twclid });
@@ -230,19 +237,19 @@ function cleanupData(mappedData) {
     for (let userDataKey in mappedData.identifiers) {
       if (mappedData.identifiers[userDataKey]['hashed_email']) {
         userData.push({
-          hashed_email: mappedData.identifiers[userDataKey]['hashed_email'],
+          hashed_email: mappedData.identifiers[userDataKey]['hashed_email']
         });
       }
 
       if (mappedData.identifiers[userDataKey]['hashed_phone_number']) {
         userData.push({
-          hashed_phone_number: mappedData.identifiers[userDataKey]['hashed_phone_number'],
+          hashed_phone_number: mappedData.identifiers[userDataKey]['hashed_phone_number']
         });
       }
 
       if (mappedData.identifiers[userDataKey]['twclid']) {
         userData.push({
-          twclid: mappedData.identifiers[userDataKey]['twclid'],
+          twclid: mappedData.identifiers[userDataKey]['twclid']
         });
       }
     }
@@ -261,10 +268,13 @@ function cleanupData(mappedData) {
   if (mappedData.contents) {
     for (let contentKey in mappedData.contents) {
       if (mappedData.contents[contentKey].content_price) {
-        mappedData.contents[contentKey].content_price = makeNumber(mappedData.contents[contentKey].content_price);
+        mappedData.contents[contentKey].content_price = makeNumber(
+          mappedData.contents[contentKey].content_price
+        );
 
         if (mappedData.contents[contentKey].content_price.toString().indexOf('.') === -1) {
-          mappedData.contents[contentKey].content_price = mappedData.contents[contentKey].content_price + '.00';
+          mappedData.contents[contentKey].content_price =
+            mappedData.contents[contentKey].content_price + '.00';
         }
       }
     }
@@ -312,16 +322,14 @@ function addEcommerceData(eventData, mappedData) {
   }
 
   if (eventData['x-ga-mp1-ev']) mappedData.value = eventData['x-ga-mp1-ev'];
-  else if (eventData['x-ga-mp1-tr'])
-    mappedData.value = eventData['x-ga-mp1-tr'];
+  else if (eventData['x-ga-mp1-tr']) mappedData.value = eventData['x-ga-mp1-tr'];
   else if (eventData.value) mappedData.value = eventData.value;
   else if (valueFromItems) mappedData.value = valueFromItems;
 
   if (eventData.currency) mappedData.price_currency = eventData.currency;
   else if (currencyFromItems) mappedData.price_currency = currencyFromItems;
 
-  if (eventData.number_items)
-    mappedData.number_items = makeInteger(eventData.number_items);
+  if (eventData.number_items) mappedData.number_items = makeInteger(eventData.number_items);
   else if (numItems) mappedData.number_items = makeInteger(numItems);
 
   return mappedData;
@@ -355,16 +363,13 @@ function addUserData(eventData, mappedData) {
 }
 
 function addServerEventData(eventData, data, mappedData) {
-  if (eventData.transaction_id)
-    mappedData.conversion_id = eventData.transaction_id;
+  if (eventData.transaction_id) mappedData.conversion_id = eventData.transaction_id;
   else if (eventData.event_id) mappedData.conversion_id = eventData.event_id;
 
   if (eventData.description) mappedData.description = eventData.description;
 
-  if (eventData.conversion_time)
-    mappedData.conversion_time = eventData.conversion_time;
-  else if (eventData.conversionTime)
-    mappedData.conversion_time = eventData.conversionTime;
+  if (eventData.conversion_time) mappedData.conversion_time = eventData.conversion_time;
+  else if (eventData.conversionTime) mappedData.conversion_time = eventData.conversionTime;
   else if (eventData.dateISO) mappedData.conversion_time = eventData.dateISO;
 
   return mappedData;
