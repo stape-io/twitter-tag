@@ -1,24 +1,31 @@
-const getAllEventData = require('getAllEventData');
-const JSON = require('JSON');
-const sendHttpRequest = require('sendHttpRequest');
-const getContainerVersion = require('getContainerVersion');
-const logToConsole = require('logToConsole');
-const sha256Sync = require('sha256Sync');
-const getRequestHeader = require('getRequestHeader');
-const getType = require('getType');
-const makeString = require('makeString');
-const makeInteger = require('makeInteger');
-const makeNumber = require('makeNumber');
-const parseUrl = require('parseUrl');
-const setCookie = require('setCookie');
 const decodeUriComponent = require('decodeUriComponent');
 const encodeUriComponent = require('encodeUriComponent');
+const getAllEventData = require('getAllEventData');
 const getCookieValues = require('getCookieValues');
+const getContainerVersion = require('getContainerVersion');
+const getRequestHeader = require('getRequestHeader');
+const getType = require('getType');
+const JSON = require('JSON');
+const logToConsole = require('logToConsole');
+const makeInteger = require('makeInteger');
+const makeNumber = require('makeNumber');
+const makeString = require('makeString');
+const parseUrl = require('parseUrl');
+const sendHttpRequest = require('sendHttpRequest');
+const setCookie = require('setCookie');
+const sha256Sync = require('sha256Sync');
+
+/*==============================================================================
+==============================================================================*/
+
+const eventData = getAllEventData();
+
+if (!isConsentGivenOrNotRequired(data, eventData)) {
+  return gtmOnSuccess();
+}
 
 const isLoggingEnabled = determinateIsLoggingEnabled();
 const traceId = isLoggingEnabled ? getRequestHeader('trace-id') : undefined;
-
-const eventData = getAllEventData();
 const url = eventData.page_location || getRequestHeader('referer');
 
 let twclid = getCookieValues('twclid')[0];
@@ -130,6 +137,11 @@ sendHttpRequest(
 if (data.useOptimisticScenario) {
   data.gtmOnSuccess();
 }
+
+/*==============================================================================
+  Vendor related functions
+==============================================================================*/
+
 function mapEvent(eventData, data) {
   let mappedData = {
     event_id: data.eventId,
@@ -375,6 +387,22 @@ function addServerEventData(eventData, data, mappedData) {
   return mappedData;
 }
 
+/*==============================================================================
+  Helpers
+==============================================================================*/
+
+function enc(data) {
+  if (['null', 'undefined'].indexOf(getType(data)) !== -1) data = '';
+  return encodeUriComponent(makeString(data));
+}
+
+function isConsentGivenOrNotRequired(data, eventData) {
+  if (data.adStorageConsent !== 'required') return true;
+  if (eventData.consent_state) return !!eventData.consent_state.ad_storage;
+  const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110"
+  return xGaGcs[2] === '1';
+}
+
 function determinateIsLoggingEnabled() {
   const containerVersion = getContainerVersion();
   const isDebug = !!(
@@ -395,9 +423,4 @@ function determinateIsLoggingEnabled() {
   }
 
   return data.logType === 'always';
-}
-
-function enc(data) {
-  data = data || '';
-  return encodeUriComponent(data);
 }

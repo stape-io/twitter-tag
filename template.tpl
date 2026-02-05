@@ -42,90 +42,98 @@ ___TEMPLATE_PARAMETERS___
     "displayName": "📖 \u003ca href\u003d\"https://stape.io/blog/twitter-conversion-api-tag-for-sgtm\"\u003eGetting started: How to Use the Twitter Conversion API Tag for sGTM\u003c/a\u003e\n\u003c/br\u003e\u003c/br\u003e"
   },
   {
-    "type": "TEXT",
-    "name": "consumerKey",
-    "displayName": "Consumer Key",
-    "simpleValueType": true,
-    "valueValidators": [
+    "type": "GROUP",
+    "name": "configGroup",
+    "displayName": "",
+    "groupStyle": "NO_ZIPPY",
+    "subParams": [
       {
-        "type": "NON_EMPTY"
-      }
-    ],
-    "help": "Set to your Twitter App Consumer API Key.\n\u003cbr/\u003e\nLearn more on how to generate it \u003ca href\u003d\"https://stape.io/blog/twitter-conversion-api-tag-for-sgtm#how-to-set-up-twitter-conversions-api-tag-in-s-gtm\"\u003ehere\u003c/a\u003e."
-  },
-  {
-    "type": "TEXT",
-    "name": "consumerSecret",
-    "displayName": "Consumer Secret",
-    "simpleValueType": true,
-    "valueValidators": [
+        "type": "TEXT",
+        "name": "consumerKey",
+        "displayName": "Consumer Key",
+        "simpleValueType": true,
+        "valueValidators": [
+          {
+            "type": "NON_EMPTY"
+          }
+        ],
+        "help": "Set to your Twitter App Consumer API Key.\n\u003cbr/\u003e\nLearn more on how to generate it \u003ca href\u003d\"https://stape.io/blog/twitter-conversion-api-tag-for-sgtm#how-to-set-up-twitter-conversions-api-tag-in-s-gtm\"\u003ehere\u003c/a\u003e."
+      },
       {
-        "type": "NON_EMPTY"
-      }
-    ],
-    "help": "Set to your Twitter App Consumer API Secret. \u003cbr/\u003e Learn more on how to generate it \u003ca href\u003d\"https://stape.io/blog/twitter-conversion-api-tag-for-sgtm#how-to-set-up-twitter-conversions-api-tag-in-s-gtm\"\u003ehere\u003c/a\u003e."
-  },
-  {
-    "type": "TEXT",
-    "name": "oauthToken",
-    "displayName": "OAuth Token",
-    "simpleValueType": true,
-    "valueValidators": [
+        "type": "TEXT",
+        "name": "consumerSecret",
+        "displayName": "Consumer Secret",
+        "simpleValueType": true,
+        "valueValidators": [
+          {
+            "type": "NON_EMPTY"
+          }
+        ],
+        "help": "Set to your Twitter App Consumer API Secret. \u003cbr/\u003e Learn more on how to generate it \u003ca href\u003d\"https://stape.io/blog/twitter-conversion-api-tag-for-sgtm#how-to-set-up-twitter-conversions-api-tag-in-s-gtm\"\u003ehere\u003c/a\u003e."
+      },
       {
-        "type": "NON_EMPTY"
-      }
-    ],
-    "help": "Set to your Twitter App Authentication Token. \u003cbr/\u003e Learn more on how to generate it \u003ca href\u003d\"https://stape.io/blog/twitter-conversion-api-tag-for-sgtm#how-to-set-up-twitter-conversions-api-tag-in-s-gtm\"\u003ehere\u003c/a\u003e."
-  },
-  {
-    "type": "TEXT",
-    "name": "oauthTokenSecret",
-    "displayName": "OAuth Token Secret",
-    "simpleValueType": true,
-    "valueValidators": [
+        "type": "TEXT",
+        "name": "oauthToken",
+        "displayName": "OAuth Token",
+        "simpleValueType": true,
+        "valueValidators": [
+          {
+            "type": "NON_EMPTY"
+          }
+        ],
+        "help": "Set to your Twitter App Authentication Token. \u003cbr/\u003e Learn more on how to generate it \u003ca href\u003d\"https://stape.io/blog/twitter-conversion-api-tag-for-sgtm#how-to-set-up-twitter-conversions-api-tag-in-s-gtm\"\u003ehere\u003c/a\u003e."
+      },
       {
-        "type": "NON_EMPTY"
-      }
-    ],
-    "help": "Set to your Twitter App Authentication Token Secret. \u003cbr/\u003e Learn more on how to generate it \u003ca href\u003d\"https://stape.io/blog/twitter-conversion-api-tag-for-sgtm#how-to-set-up-twitter-conversions-api-tag-in-s-gtm\"\u003ehere\u003c/a\u003e."
-  },
-  {
-    "type": "TEXT",
-    "name": "pixelId",
-    "displayName": "Pixel ID",
-    "simpleValueType": true,
-    "valueValidators": [
+        "type": "TEXT",
+        "name": "oauthTokenSecret",
+        "displayName": "OAuth Token Secret",
+        "simpleValueType": true,
+        "valueValidators": [
+          {
+            "type": "NON_EMPTY"
+          }
+        ],
+        "help": "Set to your Twitter App Authentication Token Secret. \u003cbr/\u003e Learn more on how to generate it \u003ca href\u003d\"https://stape.io/blog/twitter-conversion-api-tag-for-sgtm#how-to-set-up-twitter-conversions-api-tag-in-s-gtm\"\u003ehere\u003c/a\u003e."
+      },
       {
-        "type": "NON_EMPTY"
-      }
-    ],
-    "help": "The Universal Website Tag (UWT) ID for an ad account. This represents that base36 encoded value for an ad account’s UWT id."
-  },
-  {
-    "type": "TEXT",
-    "name": "eventId",
-    "displayName": "Event ID",
-    "simpleValueType": true,
-    "valueValidators": [
+        "type": "TEXT",
+        "name": "pixelId",
+        "displayName": "Pixel ID",
+        "simpleValueType": true,
+        "valueValidators": [
+          {
+            "type": "NON_EMPTY"
+          }
+        ],
+        "help": "The Universal Website Tag (UWT) ID for an ad account. This represents that base36 encoded value for an ad account’s UWT id."
+      },
       {
-        "type": "NON_EMPTY"
+        "type": "TEXT",
+        "name": "eventId",
+        "displayName": "Event ID",
+        "simpleValueType": true,
+        "valueValidators": [
+          {
+            "type": "NON_EMPTY"
+          }
+        ],
+        "help": "The base-36 ID of a specific event. It matches a pre-configured event contained within this ad account. This is called ID in the corresponding Single Event Website Tag in Ads Manager and Ads API."
+      },
+      {
+        "type": "CHECKBOX",
+        "name": "useHttpOnlyCookie",
+        "checkboxText": "Use HttpOnly cookies",
+        "simpleValueType": true,
+        "help": "Forbids JavaScript from accessing the cookie if enabled."
+      },
+      {
+        "type": "CHECKBOX",
+        "name": "useOptimisticScenario",
+        "checkboxText": "Use Optimistic Scenario",
+        "simpleValueType": true,
+        "help": "The tag will call gtmOnSuccess() without waiting for a response from the API. This will speed up sGTM response time however your tag will always return the status fired successfully even in case it is not."
       }
-    ],
-    "help": "The base-36 ID of a specific event. It matches a pre-configured event contained within this ad account. This is called ID in the corresponding Single Event Website Tag in Ads Manager and Ads API."
-  },
-  {
-    "type": "CHECKBOX",
-    "name": "useHttpOnlyCookie",
-    "checkboxText": "Use HttpOnly cookies",
-    "simpleValueType": true,
-    "help": "Forbids JavaScript from accessing the cookie if enabled."
-  },
-  {
-    "type": "CHECKBOX",
-    "name": "useOptimisticScenario",
-    "checkboxText": "Use Optimistic Scenario",
-    "simpleValueType": true,
-    "help": "The tag will call gtmOnSuccess() without waiting for a response from the API. This will speed up sGTM response time however your tag will always return the status fired successfully even in case it is not."
+    ]
   },
   {
     "displayName": "Server Event Data Override",
@@ -244,6 +252,31 @@ ___TEMPLATE_PARAMETERS___
     "help": "See \u003ca href\u003d\"https://developer.twitter.com/en/docs/twitter-ads-api/measurement/web-conversions/conversions\" target\u003d\"_blank\"\u003ethis documentation\u003c/a\u003e for more details on what user data parameters you can add to the call. If the documentation requires the parameter to be hashed, you \u003cstrong\u003emust\u003c/strong\u003e hash it with SHA256, or the tag will do this automatically before sending the event to Twitter."
   },
   {
+    "type": "GROUP",
+    "name": "tagExecutionConsentSettingsGroup",
+    "displayName": "Tag Execution Consent Settings",
+    "groupStyle": "ZIPPY_CLOSED",
+    "subParams": [
+      {
+        "type": "RADIO",
+        "name": "adStorageConsent",
+        "radioItems": [
+          {
+            "value": "optional",
+            "displayValue": "Send data always"
+          },
+          {
+            "value": "required",
+            "displayValue": "Send data in case marketing consent given",
+            "help": "Aborts the tag execution if marketing consent (\u003ci\u003ead_storage\u003c/i\u003e Google Consent Mode or Stape\u0027s Data Tag parameter) is not given."
+          }
+        ],
+        "simpleValueType": true,
+        "defaultValue": "optional"
+      }
+    ]
+  },
+  {
     "displayName": "Logs Settings",
     "name": "logsGroup",
     "groupStyle": "ZIPPY_CLOSED",
@@ -276,27 +309,34 @@ ___TEMPLATE_PARAMETERS___
 
 ___SANDBOXED_JS_FOR_SERVER___
 
-const getAllEventData = require('getAllEventData');
-const JSON = require('JSON');
-const sendHttpRequest = require('sendHttpRequest');
-const getContainerVersion = require('getContainerVersion');
-const logToConsole = require('logToConsole');
-const sha256Sync = require('sha256Sync');
-const getRequestHeader = require('getRequestHeader');
-const getType = require('getType');
-const makeString = require('makeString');
-const makeInteger = require('makeInteger');
-const makeNumber = require('makeNumber');
-const parseUrl = require('parseUrl');
-const setCookie = require('setCookie');
 const decodeUriComponent = require('decodeUriComponent');
 const encodeUriComponent = require('encodeUriComponent');
+const getAllEventData = require('getAllEventData');
 const getCookieValues = require('getCookieValues');
+const getContainerVersion = require('getContainerVersion');
+const getRequestHeader = require('getRequestHeader');
+const getType = require('getType');
+const JSON = require('JSON');
+const logToConsole = require('logToConsole');
+const makeInteger = require('makeInteger');
+const makeNumber = require('makeNumber');
+const makeString = require('makeString');
+const parseUrl = require('parseUrl');
+const sendHttpRequest = require('sendHttpRequest');
+const setCookie = require('setCookie');
+const sha256Sync = require('sha256Sync');
+
+/*==============================================================================
+==============================================================================*/
+
+const eventData = getAllEventData();
+
+if (!isConsentGivenOrNotRequired(data, eventData)) {
+  return data.gtmOnSuccess();
+}
 
 const isLoggingEnabled = determinateIsLoggingEnabled();
 const traceId = isLoggingEnabled ? getRequestHeader('trace-id') : undefined;
-
-const eventData = getAllEventData();
 const url = eventData.page_location || getRequestHeader('referer');
 
 let twclid = getCookieValues('twclid')[0];
@@ -408,6 +448,11 @@ sendHttpRequest(
 if (data.useOptimisticScenario) {
   data.gtmOnSuccess();
 }
+
+/*==============================================================================
+  Vendor related functions
+==============================================================================*/
+
 function mapEvent(eventData, data) {
   let mappedData = {
     event_id: data.eventId,
@@ -653,6 +698,22 @@ function addServerEventData(eventData, data, mappedData) {
   return mappedData;
 }
 
+/*==============================================================================
+  Helpers
+==============================================================================*/
+
+function enc(data) {
+  if (['null', 'undefined'].indexOf(getType(data)) !== -1) data = '';
+  return encodeUriComponent(makeString(data));
+}
+
+function isConsentGivenOrNotRequired(data, eventData) {
+  if (data.adStorageConsent !== 'required') return true;
+  if (eventData.consent_state) return !!eventData.consent_state.ad_storage;
+  const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110"
+  return xGaGcs[2] === '1';
+}
+
 function determinateIsLoggingEnabled() {
   const containerVersion = getContainerVersion();
   const isDebug = !!(
@@ -673,11 +734,6 @@ function determinateIsLoggingEnabled() {
   }
 
   return data.logType === 'always';
-}
-
-function enc(data) {
-  data = data || '';
-  return encodeUriComponent(data);
 }
 
 
