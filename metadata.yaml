@@ -1,6 +1,8 @@
 homepage: 'https://stape.io/'
 documentation: 'https://github.com/stape-io/twitter-tag'
 versions:
+  - sha: a71ed9fb16ec7462e0695d1eb1fd6d9c454e337b
+    changeNotes: Added consent section.
   - sha: 9eadee9fba51122d92789a67c4ab34094a6f84b0
     changeNotes: Added support to 'search_string' parameter.
   - sha: 1701089bfac706767259c5ad8d073044a3dc915e
