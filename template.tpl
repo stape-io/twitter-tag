@@ -44,8 +44,6 @@ ___TEMPLATE_PARAMETERS___
   {
     "type": "GROUP",
     "name": "configGroup",
-    "displayName": "",
-    "groupStyle": "NO_ZIPPY",
     "subParams": [
       {
         "type": "TEXT",
@@ -142,6 +140,19 @@ ___TEMPLATE_PARAMETERS___
     "type": "GROUP",
     "subParams": [
       {
+        "type": "LABEL",
+        "name": "serverEventDataListLabel",
+        "displayName": "See \u003ca href\u003d\"https://developer.twitter.com/en/docs/twitter-ads-api/measurement/web-conversions/conversions\" target\u003d\"_blank\"\u003ethis documentation\u003c/a\u003e for more details on what data parameters you can add to the event.\n\u003cbr/\u003e\u003cbr/\u003e"
+      },
+      {
+        "type": "CHECKBOX",
+        "name": "autoMapServerEventData",
+        "checkboxText": "Automap Server Event Data",
+        "simpleValueType": true,
+        "help": "If enabled, the tag will attempt to automatically map parameters from your event data.\n\u003cbr/\u003e\u003cbr/\u003e\nAny value you manually enter in a field below will always override the auto-mapped value.\n\u003cbr/\u003e\u003cbr/\u003e\nDefault mappings:\n\u003cul\u003e\n\u003cli\u003eValue:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData[\u0027x-ga-mp1-ev\u0027]\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData[\u0027x-ga-mp1-tr\u0027]\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.value\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eSum of Price * Quantity from eventData.items[] or eventData.ecommerce.items[]\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eCurrency:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.currency\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.items[0].currency or eventData.ecommerce.items[0].currency\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eNumber Items:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.number_items\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eSum of quantities from eventData.items[] or eventData.ecommerce.items[]\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eContents:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.items[]\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.ecommerce.items[]\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eConversion ID:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.transaction_id\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.event_id\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eDescription:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.description\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eConversion Time:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.conversion_time\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.conversionTime\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.dateISO\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eSearch String:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.search_string\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003c/ul\u003e",
+        "defaultValue": true
+      },
+      {
         "name": "serverEventDataList",
         "simpleTableColumns": [
           {
@@ -174,7 +185,7 @@ ___TEMPLATE_PARAMETERS___
               },
               {
                 "value": "conversion_id",
-                "displayValue": "Conversion ID"
+                "displayValue": "Conversion ID (for deduplication)"
               },
               {
                 "value": "description",
@@ -200,8 +211,7 @@ ___TEMPLATE_PARAMETERS___
         "type": "SIMPLE_TABLE",
         "newRowButtonText": "Add property"
       }
-    ],
-    "help": "See \u003ca href\u003d\"https://developer.twitter.com/en/docs/twitter-ads-api/measurement/web-conversions/conversions\" target\u003d\"_blank\"\u003ethis documentation\u003c/a\u003e for more details on what data parameters you can override."
+    ]
   },
   {
     "displayName": "User Data",
@@ -209,6 +219,19 @@ ___TEMPLATE_PARAMETERS___
     "groupStyle": "ZIPPY_CLOSED",
     "type": "GROUP",
     "subParams": [
+      {
+        "type": "LABEL",
+        "name": "userDataListLabel",
+        "displayName": "See \u003ca href\u003d\"https://developer.twitter.com/en/docs/twitter-ads-api/measurement/web-conversions/conversions\" target\u003d\"_blank\"\u003ethis documentation\u003c/a\u003e for more details on what data parameters you can add to the event.\n\u003cbr/\u003e\u003cbr/\u003e"
+      },
+      {
+        "type": "CHECKBOX",
+        "name": "autoMapUserData",
+        "checkboxText": "Automap User Data",
+        "simpleValueType": true,
+        "help": "If enabled, the tag will attempt to automatically map parameters from your event data.\n\u003cbr/\u003e\u003cbr/\u003e\nAny value you manually enter in a field below will always override the auto-mapped value.\n\u003cbr/\u003e\u003cbr/\u003e\nDefault mappings:\n\u003cul\u003e\n\u003cli\u003etwclid:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003etwclid cookie\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.twclid\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eURL query parameter twclid\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eEmail:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.email\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.user_data.email_address\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.user_data.email\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003ePhone:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.phone\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.user_data.phone_number\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.user_data.phone\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003c/ul\u003e",
+        "defaultValue": true
+      },
       {
         "name": "userDataList",
         "simpleTableColumns": [
@@ -226,15 +249,15 @@ ___TEMPLATE_PARAMETERS___
             "selectItems": [
               {
                 "value": "hashed_email",
-                "displayValue": "Email"
+                "displayValue": "Email (if not SHA256 hashed, it will be automatically hashed)"
+              },
+              {
+                "value": "hashed_phone_number",
+                "displayValue": "Phone (if not SHA256 hashed, it will be automatically hashed)"
               },
               {
                 "value": "twclid",
                 "displayValue": "twclid"
-              },
-              {
-                "value": "hashed_phone_number",
-                "displayValue": "Phone"
               }
             ]
           },
@@ -248,8 +271,7 @@ ___TEMPLATE_PARAMETERS___
         "type": "SIMPLE_TABLE",
         "newRowButtonText": "Add property"
       }
-    ],
-    "help": "See \u003ca href\u003d\"https://developer.twitter.com/en/docs/twitter-ads-api/measurement/web-conversions/conversions\" target\u003d\"_blank\"\u003ethis documentation\u003c/a\u003e for more details on what user data parameters you can add to the call. If the documentation requires the parameter to be hashed, you \u003cstrong\u003emust\u003c/strong\u003e hash it with SHA256, or the tag will do this automatically before sending the event to Twitter."
+    ]
   },
   {
     "type": "GROUP",
@@ -275,34 +297,6 @@ ___TEMPLATE_PARAMETERS___
         "defaultValue": "optional"
       }
     ]
-  },
-  {
-    "displayName": "Logs Settings",
-    "name": "logsGroup",
-    "groupStyle": "ZIPPY_CLOSED",
-    "type": "GROUP",
-    "subParams": [
-      {
-        "type": "RADIO",
-        "name": "logType",
-        "radioItems": [
-          {
-            "value": "no",
-            "displayValue": "Do not log"
-          },
-          {
-            "value": "debug",
-            "displayValue": "Log to console during debug and preview"
-          },
-          {
-            "value": "always",
-            "displayValue": "Always log to console"
-          }
-        ],
-        "simpleValueType": true,
-        "defaultValue": "debug"
-      }
-    ]
   }
 ]
 
@@ -313,11 +307,9 @@ const decodeUriComponent = require('decodeUriComponent');
 const encodeUriComponent = require('encodeUriComponent');
 const getAllEventData = require('getAllEventData');
 const getCookieValues = require('getCookieValues');
-const getContainerVersion = require('getContainerVersion');
 const getRequestHeader = require('getRequestHeader');
 const getType = require('getType');
 const JSON = require('JSON');
-const logToConsole = require('logToConsole');
 const makeInteger = require('makeInteger');
 const makeNumber = require('makeNumber');
 const makeString = require('makeString');
@@ -335,34 +327,10 @@ if (!isConsentGivenOrNotRequired(data, eventData)) {
   return data.gtmOnSuccess();
 }
 
-const isLoggingEnabled = determinateIsLoggingEnabled();
-const traceId = isLoggingEnabled ? getRequestHeader('trace-id') : undefined;
-const url = eventData.page_location || getRequestHeader('referer');
+const twclid = getClickId();
+setClickIdCookie(twclid);
 
-let twclid = getCookieValues('twclid')[0];
-if (!twclid) twclid = eventData.twclid;
-
-if (url) {
-  const urlParsed = parseUrl(url);
-
-  if (urlParsed && urlParsed.searchParams.twclid) {
-    twclid = decodeUriComponent(urlParsed.searchParams.twclid);
-  }
-}
-
-const containerIdentifier = getRequestHeader('x-gtm-identifier');
-const defaultDomain = getRequestHeader('x-gtm-default-domain');
-const containerApiKey = getRequestHeader('x-gtm-api-key');
-
-let postUrl =
-  'https://' +
-  enc(containerIdentifier) +
-  '.' +
-  enc(defaultDomain) +
-  '/stape-api/' +
-  enc(containerApiKey) +
-  '/v1/twitter/auth-proxy';
-const mappedEventData = mapEvent(eventData, data);
+const mappedEventData = mapEvent(data, eventData, twclid);
 const postBody = {
   pixel_id: data.pixelId,
   auth: {
@@ -373,54 +341,10 @@ const postBody = {
   },
   conversions: [mappedEventData]
 };
-
-if (isLoggingEnabled) {
-  logToConsole(
-    JSON.stringify({
-      Name: 'Twitter',
-      Type: 'Request',
-      TraceId: traceId,
-      EventName: mappedEventData.description
-        ? mappedEventData.description
-        : mappedEventData.eventId,
-      RequestMethod: 'POST',
-      RequestUrl: postUrl,
-      RequestBody: postBody
-    })
-  );
-}
-
-const coockieOptions = {
-  domain: 'auto',
-  path: '/',
-  samesite: 'Lax',
-  secure: true,
-  'max-age': 7776000, // 90 days
-  HttpOnly: !!data.useHttpOnlyCookie
-};
-
-if (twclid) {
-  setCookie('twclid', twclid, coockieOptions);
-}
+const postUrl = generateRequestUrl();
 sendHttpRequest(
   postUrl,
   (statusCode, headers, body) => {
-    if (isLoggingEnabled) {
-      logToConsole(
-        JSON.stringify({
-          Name: 'Twitter',
-          Type: 'Response',
-          TraceId: traceId,
-          EventName: mappedEventData.description
-            ? mappedEventData.description
-            : mappedEventData.eventId,
-          ResponseStatusCode: statusCode,
-          ResponseHeaders: headers,
-          ResponseBody: body
-        })
-      );
-    }
-
     if (!data.useOptimisticScenario) {
       const parsedBody = JSON.parse(body || '{}');
       if (
@@ -446,24 +370,67 @@ sendHttpRequest(
 );
 
 if (data.useOptimisticScenario) {
-  data.gtmOnSuccess();
+  return data.gtmOnSuccess();
 }
 
 /*==============================================================================
   Vendor related functions
 ==============================================================================*/
 
-function mapEvent(eventData, data) {
+function getClickId() {
+  let twclid = getCookieValues('twclid')[0] || eventData.twclid;
+
+  const url = eventData.page_location || getRequestHeader('referer');
+  if (url) {
+    const urlParsed = parseUrl(url);
+    if (urlParsed && urlParsed.searchParams.twclid) {
+      twclid = decodeUriComponent(urlParsed.searchParams.twclid);
+    }
+  }
+
+  return twclid;
+}
+
+function setClickIdCookie(twclid) {
+  if (!twclid) return;
+
+  const cookieOptions = {
+    domain: 'auto',
+    path: '/',
+    samesite: 'Lax',
+    secure: true,
+    'max-age': 7776000, // 90 days
+    HttpOnly: !!data.useHttpOnlyCookie
+  };
+
+  setCookie('twclid', twclid, cookieOptions);
+}
+
+function generateRequestUrl() {
+  const containerIdentifier = getRequestHeader('x-gtm-identifier');
+  const defaultDomain = getRequestHeader('x-gtm-default-domain');
+  const containerApiKey = getRequestHeader('x-gtm-api-key');
+
+  return (
+    'https://' +
+    enc(containerIdentifier) +
+    '.' +
+    enc(defaultDomain) +
+    '/stape-api/' +
+    enc(containerApiKey) +
+    '/v1/twitter/auth-proxy'
+  );
+}
+
+function mapEvent(data, eventData, twclid) {
   let mappedData = {
     event_id: data.eventId,
     identifiers: []
   };
 
-  if (twclid) mappedData.identifiers.push({ twclid: twclid });
-
-  mappedData = addServerEventData(eventData, data, mappedData);
-  mappedData = addUserData(eventData, mappedData);
-  mappedData = addEcommerceData(eventData, mappedData);
+  mappedData = addServerEventData(data, eventData, mappedData);
+  mappedData = addEcommerceData(data, eventData, mappedData);
+  mappedData = addUserData(data, eventData, mappedData, twclid);
   mappedData = overrideDataIfNeeded(data, mappedData);
   mappedData = cleanupData(mappedData);
   mappedData = hashDataIfNeeded(mappedData);
@@ -606,94 +573,122 @@ function cleanupData(mappedData) {
   return mappedData;
 }
 
-function addEcommerceData(eventData, mappedData) {
-  let currencyFromItems = '';
-  let valueFromItems = 0;
-  let numItems = 0;
+function addEcommerceData(data, eventData, mappedData) {
+  const autoMapEnabled = data.hasOwnProperty('autoMapServerEventData')
+    ? data.autoMapServerEventData
+    : true;
 
-  if (eventData.items && eventData.items[0]) {
-    mappedData.custom_data = {};
-    mappedData.contents = [];
-    mappedData.custom_data.contents = {};
-    currencyFromItems = eventData.items[0].currency;
+  if (autoMapEnabled) {
+    let currencyFromItems = '';
+    let valueFromItems = 0;
+    let numItems = 0;
 
-    eventData.items.forEach((d, i) => {
-      let content = {};
-      if (d.id) content.content_id = d.id;
-      else if (d.item_id) content.content_id = d.item_id;
+    let items;
+    if (getType(eventData.items) === 'array' && eventData.items.length) items = eventData.items;
+    else if (
+      getType(eventData.ecommerce) === 'object' &&
+      getType(eventData.ecommerce.items) === 'array' &&
+      eventData.ecommerce.items.length
+    ) {
+      items = eventData.ecommerce.items;
+    }
 
-      if (d.group_id) content.content_group_id = d.group_id;
-      else if (d.group) content.content_group_id = d.group;
+    if (items && items[0]) {
+      mappedData.custom_data = {};
+      mappedData.contents = [];
+      mappedData.custom_data.contents = {};
+      currencyFromItems = items[0].currency;
 
-      if (d.name) content.content_name = d.name;
-      else if (d.item_name) content.content_name = d.item_name;
+      items.forEach((d, i) => {
+        let content = {};
+        const id = d.id || d.item_id;
+        if (id) content.content_id = id;
 
-      if (d.type) content.content_type = d.type;
+        const groupId = d.group_id || d.group;
+        if (groupId) content.content_group_id = groupId;
 
-      if (d.quantity) {
-        content.num_items = makeInteger(d.quantity);
-        numItems += makeInteger(d.quantity);
-      }
+        const name = d.name || d.item_name;
+        if (name) content.content_name = name;
 
-      if (d.price) {
-        content.content_price = d.price;
-        valueFromItems += d.quantity ? d.quantity * d.price : d.price;
-      }
+        if (d.type) content.content_type = d.type;
 
-      mappedData.contents[i] = content;
-    });
-  }
+        if (d.quantity) {
+          content.num_items = makeInteger(d.quantity);
+          numItems += makeInteger(d.quantity);
+        }
 
-  if (eventData['x-ga-mp1-ev']) mappedData.value = eventData['x-ga-mp1-ev'];
-  else if (eventData['x-ga-mp1-tr']) mappedData.value = eventData['x-ga-mp1-tr'];
-  else if (eventData.value) mappedData.value = eventData.value;
-  else if (valueFromItems) mappedData.value = valueFromItems;
+        if (d.price) {
+          content.content_price = d.price;
+          valueFromItems += d.quantity ? d.quantity * d.price : d.price;
+        }
 
-  if (eventData.currency) mappedData.price_currency = eventData.currency;
-  else if (currencyFromItems) mappedData.price_currency = currencyFromItems;
+        mappedData.contents[i] = content;
+      });
+    }
 
-  if (eventData.number_items) mappedData.number_items = makeInteger(eventData.number_items);
-  else if (numItems) mappedData.number_items = makeInteger(numItems);
+    const value =
+      eventData['x-ga-mp1-ev'] || eventData['x-ga-mp1-tr'] || eventData.value || valueFromItems;
+    if (value) mappedData.value = value;
 
-  return mappedData;
-}
+    const currency = eventData.currency || currencyFromItems;
+    if (currency) mappedData.price_currency = currency;
 
-function addUserData(eventData, mappedData) {
-  let hashedEmail;
-  let hashedPhoneNumber;
-
-  if (eventData.email) hashedEmail = eventData.email;
-  else if (eventData.user_data && eventData.user_data.email_address)
-    hashedEmail = eventData.user_data.email_address;
-  else if (eventData.user_data && eventData.user_data.email)
-    hashedEmail = eventData.user_data.email;
-
-  if (hashedEmail) {
-    mappedData.identifiers.push({ hashed_email: hashedEmail });
-  }
-
-  if (eventData.phone) hashedPhoneNumber = eventData.phone;
-  else if (eventData.user_data && eventData.user_data.phone_number)
-    hashedPhoneNumber = eventData.user_data.phone_number;
-  else if (eventData.user_data && eventData.user_data.phone)
-    hashedPhoneNumber = eventData.user_data.phone;
-
-  if (hashedPhoneNumber) {
-    mappedData.identifiers.push({ hashed_phone_number: hashedPhoneNumber });
+    const numberItems = eventData.number_items || numItems;
+    if (numberItems) mappedData.number_items = makeInteger(numberItems);
   }
 
   return mappedData;
 }
 
-function addServerEventData(eventData, data, mappedData) {
-  if (eventData.transaction_id) mappedData.conversion_id = eventData.transaction_id;
-  else if (eventData.event_id) mappedData.conversion_id = eventData.event_id;
+function addUserData(data, eventData, mappedData, twclid) {
+  const autoMapEnabled = data.hasOwnProperty('autoMapUserData') ? data.autoMapUserData : true;
 
-  if (eventData.description) mappedData.description = eventData.description;
+  if (autoMapEnabled) {
+    if (twclid) mappedData.identifiers.push({ twclid: twclid });
 
-  if (eventData.conversion_time) mappedData.conversion_time = eventData.conversion_time;
-  else if (eventData.conversionTime) mappedData.conversion_time = eventData.conversionTime;
-  else if (eventData.dateISO) mappedData.conversion_time = eventData.dateISO;
+    const hashedEmail =
+      eventData.email ||
+      (eventData.user_data && eventData.user_data.email_address
+        ? eventData.user_data.email_address
+        : undefined) ||
+      (eventData.user_data && eventData.user_data.email ? eventData.user_data.email : undefined);
+
+    if (hashedEmail) {
+      mappedData.identifiers.push({ hashed_email: hashedEmail });
+    }
+
+    const hashedPhoneNumber =
+      eventData.phone ||
+      (eventData.user_data && eventData.user_data.phone_number
+        ? eventData.user_data.phone_number
+        : undefined) ||
+      (eventData.user_data && eventData.user_data.phone ? eventData.user_data.phone : undefined);
+
+    if (hashedPhoneNumber) {
+      mappedData.identifiers.push({ hashed_phone_number: hashedPhoneNumber });
+    }
+  }
+
+  return mappedData;
+}
+
+function addServerEventData(data, eventData, mappedData) {
+  const autoMapEnabled = data.hasOwnProperty('autoMapServerEventData')
+    ? data.autoMapServerEventData
+    : true;
+
+  if (autoMapEnabled) {
+    const transactionId = eventData.transaction_id || eventData.event_id;
+    if (transactionId) mappedData.conversion_id = transactionId;
+
+    if (eventData.description) mappedData.description = eventData.description;
+
+    const conversionTime =
+      eventData.conversion_time || eventData.conversionTime || eventData.dateISO;
+    if (conversionTime) mappedData.conversion_time = conversionTime;
+
+    if (eventData.search_string) mappedData.search_string = eventData.search_string;
+  }
 
   return mappedData;
 }
@@ -712,28 +707,6 @@ function isConsentGivenOrNotRequired(data, eventData) {
   if (eventData.consent_state) return !!eventData.consent_state.ad_storage;
   const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110"
   return xGaGcs[2] === '1';
-}
-
-function determinateIsLoggingEnabled() {
-  const containerVersion = getContainerVersion();
-  const isDebug = !!(
-    containerVersion &&
-    (containerVersion.debugMode || containerVersion.previewMode)
-  );
-
-  if (!data.logType) {
-    return isDebug;
-  }
-
-  if (data.logType === 'no') {
-    return false;
-  }
-
-  if (data.logType === 'debug') {
-    return isDebug;
-  }
-
-  return data.logType === 'always';
 }
 
 
@@ -901,37 +874,6 @@ ___SERVER_PERMISSIONS___
   {
     "instance": {
       "key": {
-        "publicId": "logging",
-        "versionId": "1"
-      },
-      "param": [
-        {
-          "key": "environments",
-          "value": {
-            "type": 1,
-            "string": "all"
-          }
-        }
-      ]
-    },
-    "clientAnnotations": {
-      "isEditedByUser": true
-    },
-    "isRequired": true
-  },
-  {
-    "instance": {
-      "key": {
-        "publicId": "read_container_data",
-        "versionId": "1"
-      },
-      "param": []
-    },
-    "isRequired": true
-  },
-  {
-    "instance": {
-      "key": {
         "publicId": "set_cookies",
         "versionId": "1"
       },
@@ -1066,6 +1008,8 @@ scenarios: []
 
 ___NOTES___
 
-Created on 18/08/2022, 12:25:26
+2026-05-25 Change Notes:
+ - Logging removal.
 
+Created on 18/08/2022, 12:25:26
 
