@@ -53,16 +53,9 @@ See [this documentation](https://developer.twitter.com/en/docs/twitter-ads-api/m
 
 See [this documentation](https://developer.twitter.com/en/docs/twitter-ads-api/measurement/web-conversions/conversions) for more details on what user data parameters you can add to the call. If the documentation requires the parameter to be hashed, you **must** hash it with SHA256, or the tag will do this automatically before sending the event to Twitter.
 
-### Logs Settings
-
-| Parameter | Description |
-| :--- | :--- |
-| **Log Type** | Controls logging to the GTM console. Options are `Do not log`, `Log to console during debug and preview`, or `Always log to console`. |
-
 ## Useful Resources
 
 - [How to Use the Twitter Conversion API Tag for sGTM](https://stape.io/blog/twitter-conversion-api-tag-for-sgtm)
-
 
 ## Open Source
 
