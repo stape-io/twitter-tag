@@ -57,8 +57,8 @@ function setClickIdCookie(twclid) {
   setCookie('twclid', twclid, cookieOptions);
 }
 
-function generateXRequestUrl(apiVersion) {
-  return 'https://ads-api.x.com/' + apiVersion + '/measurement/conversions';
+function generateXRequestUrl(apiVersion, pixelId) {
+  return 'https://ads-api.x.com/' + apiVersion + '/measurement/conversions/' + pixelId;
 }
 
 function generateLegacyProxyRequestUrl() {
@@ -86,7 +86,7 @@ function sendRequest() {
   const apiVersion = '12';
   const postUrl =
     authMethod === 'accessToken'
-      ? generateXRequestUrl(apiVersion)
+      ? generateXRequestUrl(apiVersion, data.pixelId)
       : generateLegacyProxyRequestUrl();
   const requestOptions = {
     headers: {
