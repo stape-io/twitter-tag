@@ -3,6 +3,7 @@ const encodeUriComponent = require('encodeUriComponent');
 const getAllEventData = require('getAllEventData');
 const getCookieValues = require('getCookieValues');
 const getRequestHeader = require('getRequestHeader');
+const getTimestampMillis = require('getTimestampMillis');
 const getType = require('getType');
 const JSON = require('JSON');
 const makeInteger = require('makeInteger');
@@ -16,74 +17,36 @@ const sha256Sync = require('sha256Sync');
 /*==============================================================================
 ==============================================================================*/
 
+const API_VERSION = '12';
 const eventData = getAllEventData();
 
-if (!isConsentGivenOrNotRequired(data, eventData)) {
-  return data.gtmOnSuccess();
-}
+if (shouldExitEarly(data, eventData)) return;
 
-const twclid = getClickId();
+const url = getUrl(eventData);
+const twclid = getClickId(url, eventData);
 setClickIdCookie(twclid);
 
 const mappedEventData = mapEvent(data, eventData, twclid);
-const postBody = {
-  pixel_id: data.pixelId,
-  auth: {
-    consumer_key: data.consumerKey,
-    consumer_secret: data.consumerSecret,
-    oauth_token: data.oauthToken,
-    oauth_token_secret: data.oauthTokenSecret
-  },
-  conversions: [mappedEventData]
-};
-const postUrl = generateRequestUrl();
-sendHttpRequest(
-  postUrl,
-  (statusCode, headers, body) => {
-    if (!data.useOptimisticScenario) {
-      const parsedBody = JSON.parse(body || '{}');
-      if (
-        statusCode >= 200 &&
-        statusCode < 300 &&
-        getType(parsedBody.data) === 'object' &&
-        parsedBody.data.conversions_processed
-      ) {
-        data.gtmOnSuccess();
-      } else {
-        data.gtmOnFailure();
-      }
-    }
-  },
-  {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + data.accessToken
-    },
-    method: 'POST'
-  },
-  JSON.stringify(postBody)
-);
+sendRequest(data, mappedEventData);
 
 if (data.useOptimisticScenario) {
   return data.gtmOnSuccess();
 }
 
 /*==============================================================================
-  Vendor related functions
+VENDOR RELATED FUNCTIONS
 ==============================================================================*/
 
-function getClickId() {
-  let twclid = getCookieValues('twclid')[0] || eventData.twclid;
+function getClickId(url, eventData) {
+  let clickId = getCookieValues('twclid')[0] || eventData.twclid;
 
-  const url = eventData.page_location || getRequestHeader('referer');
   if (url) {
     const urlParsed = parseUrl(url);
     if (urlParsed && urlParsed.searchParams.twclid) {
-      twclid = decodeUriComponent(urlParsed.searchParams.twclid);
+      clickId = decodeUriComponent(urlParsed.searchParams.twclid);
     }
   }
-
-  return twclid;
+  return clickId;
 }
 
 function setClickIdCookie(twclid) {
@@ -101,7 +64,11 @@ function setClickIdCookie(twclid) {
   setCookie('twclid', twclid, cookieOptions);
 }
 
-function generateRequestUrl() {
+function generateRequestUrl(pixelId, authMethod) {
+  if (authMethod === 'accessToken') {
+    return 'https://ads-api.x.com/' + API_VERSION + '/measurement/conversions/' + enc(pixelId);
+  }
+
   const containerIdentifier = getRequestHeader('x-gtm-identifier');
   const defaultDomain = getRequestHeader('x-gtm-default-domain');
   const containerApiKey = getRequestHeader('x-gtm-api-key');
@@ -117,10 +84,74 @@ function generateRequestUrl() {
   );
 }
 
+function generateRequestOptions(data, authMethod) {
+  const requestOptions = {
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'POST'
+  };
+
+  if (authMethod === 'accessToken') {
+    requestOptions.headers['X-Pixel-Token'] = data.pixelAccessToken;
+  } else {
+    requestOptions.headers['x-twitter-api-version'] = API_VERSION;
+    requestOptions.headers['Authorization'] = 'Bearer ' + data.accessToken;
+  }
+
+  return requestOptions;
+}
+
+function sendRequest(data, mappedEventData) {
+  const authMethod = data.hasOwnProperty('authMethod') ? data.authMethod : 'oAuth'; // Backward compatibility.
+  const requestUrl = generateRequestUrl(data.pixelId, authMethod);
+  const requestOptions = generateRequestOptions(data, authMethod);
+  const requestBody = getPostBody(data, mappedEventData, authMethod);
+
+  sendHttpRequest(
+    requestUrl,
+    (statusCode, headers, body) => {
+      if (!data.useOptimisticScenario) {
+        const parsedBody = JSON.parse(body || '{}');
+        if (
+          statusCode >= 200 &&
+          statusCode < 300 &&
+          getType(parsedBody.data) === 'object' &&
+          parsedBody.data.conversions_processed
+        ) {
+          return data.gtmOnSuccess();
+        } else {
+          return data.gtmOnFailure();
+        }
+      }
+    },
+    requestOptions,
+    JSON.stringify(requestBody)
+  );
+}
+
+function getPostBody(data, mappedEventData, authMethod) {
+  const postBody = {
+    pixel_id: data.pixelId,
+    conversions: [mappedEventData]
+  };
+
+  if (authMethod === 'oAuth') {
+    postBody.auth = {
+      consumer_key: data.consumerKey,
+      consumer_secret: data.consumerSecret,
+      oauth_token: data.oauthToken,
+      oauth_token_secret: data.oauthTokenSecret
+    };
+  }
+
+  return postBody;
+}
+
 function mapEvent(data, eventData, twclid) {
   let mappedData = {
     event_id: data.eventId,
-    identifiers: []
+    identifiers: {} // It will be transformed into an array in cleanupData().
   };
 
   mappedData = addServerEventData(data, eventData, mappedData);
@@ -133,76 +164,10 @@ function mapEvent(data, eventData, twclid) {
   return mappedData;
 }
 
-function isHashed(value) {
-  if (!value) {
-    return false;
-  }
-
-  return makeString(value).match('^[A-Fa-f0-9]{64}$') !== null;
-}
-
-function hashData(value) {
-  if (!value) {
-    return value;
-  }
-
-  const type = getType(value);
-
-  if (type === 'undefined' || value === 'undefined') {
-    return undefined;
-  }
-
-  if (type === 'object') {
-    return value;
-  }
-
-  if (isHashed(value)) {
-    return value;
-  }
-
-  value = makeString(value).trim().toLowerCase();
-
-  return sha256Sync(value, { outputEncoding: 'hex' });
-}
-
-function hashDataIfNeeded(mappedData) {
-  if (mappedData.identifiers) {
-    for (let key in mappedData.identifiers) {
-      if (mappedData.identifiers[key]['hashed_email']) {
-        mappedData.identifiers[key]['hashed_email'] = hashData(
-          mappedData.identifiers[key]['hashed_email']
-        );
-      }
-
-      if (mappedData.identifiers[key]['hashed_phone_number']) {
-        mappedData.identifiers[key]['hashed_phone_number'] = hashData(
-          mappedData.identifiers[key]['hashed_phone_number']
-        );
-      }
-    }
-  }
-
-  return mappedData;
-}
-
 function overrideDataIfNeeded(data, mappedData) {
   if (data.userDataList) {
     data.userDataList.forEach((d) => {
-      let userDataNotSet = true;
-
-      for (let key in mappedData.identifiers) {
-        if (mappedData.identifiers[key][d.name]) {
-          mappedData.identifiers[key][d.name] = d.value;
-          userDataNotSet = false;
-        }
-      }
-
-      if (userDataNotSet) {
-        let identifier = {};
-        identifier[d.name] = d.value;
-
-        mappedData.identifiers.push(identifier);
-      }
+      mappedData.identifiers[d.name] = d.value;
     });
   }
 
@@ -216,31 +181,21 @@ function overrideDataIfNeeded(data, mappedData) {
 }
 
 function cleanupData(mappedData) {
-  if (mappedData.identifiers) {
-    let userData = [];
+  const ids = mappedData.identifiers;
+  const userData = [];
 
-    for (let userDataKey in mappedData.identifiers) {
-      if (mappedData.identifiers[userDataKey]['hashed_email']) {
-        userData.push({
-          hashed_email: mappedData.identifiers[userDataKey]['hashed_email']
-        });
-      }
+  if (ids.twclid) userData.push({ twclid: ids.twclid });
+  if (ids.hashed_email) userData.push({ hashed_email: ids.hashed_email });
+  if (ids.hashed_phone_number) userData.push({ hashed_phone_number: ids.hashed_phone_number });
 
-      if (mappedData.identifiers[userDataKey]['hashed_phone_number']) {
-        userData.push({
-          hashed_phone_number: mappedData.identifiers[userDataKey]['hashed_phone_number']
-        });
-      }
-
-      if (mappedData.identifiers[userDataKey]['twclid']) {
-        userData.push({
-          twclid: mappedData.identifiers[userDataKey]['twclid']
-        });
-      }
-    }
-
-    mappedData.identifiers = userData;
+  if (ids.ip_address && ids.user_agent) {
+    userData.push({ ip_address: ids.ip_address, user_agent: ids.user_agent });
+  } else if ((ids.ip_address || ids.user_agent) && userData.length) {
+    if (ids.ip_address) userData[0].ip_address = ids.ip_address;
+    if (ids.user_agent) userData[0].user_agent = ids.user_agent;
   }
+
+  mappedData.identifiers = userData;
 
   if (mappedData.value) {
     mappedData.value = makeNumber(mappedData.value);
@@ -339,7 +294,7 @@ function addUserData(data, eventData, mappedData, twclid) {
   const autoMapEnabled = data.hasOwnProperty('autoMapUserData') ? data.autoMapUserData : true;
 
   if (autoMapEnabled) {
-    if (twclid) mappedData.identifiers.push({ twclid: twclid });
+    if (twclid) mappedData.identifiers.twclid = twclid;
 
     const hashedEmail =
       eventData.email ||
@@ -349,7 +304,7 @@ function addUserData(data, eventData, mappedData, twclid) {
       (eventData.user_data && eventData.user_data.email ? eventData.user_data.email : undefined);
 
     if (hashedEmail) {
-      mappedData.identifiers.push({ hashed_email: hashedEmail });
+      mappedData.identifiers.hashed_email = hashedEmail;
     }
 
     const hashedPhoneNumber =
@@ -360,8 +315,14 @@ function addUserData(data, eventData, mappedData, twclid) {
       (eventData.user_data && eventData.user_data.phone ? eventData.user_data.phone : undefined);
 
     if (hashedPhoneNumber) {
-      mappedData.identifiers.push({ hashed_phone_number: hashedPhoneNumber });
+      mappedData.identifiers.hashed_phone_number = hashedPhoneNumber;
     }
+
+    const ip = eventData.ip_override;
+    if (ip) mappedData.identifiers.ip_address = ip;
+
+    const userAgent = eventData.user_agent;
+    if (userAgent) mappedData.identifiers.user_agent = userAgent;
   }
 
   return mappedData;
@@ -381,6 +342,7 @@ function addServerEventData(data, eventData, mappedData) {
     const conversionTime =
       eventData.conversion_time || eventData.conversionTime || eventData.dateISO;
     if (conversionTime) mappedData.conversion_time = conversionTime;
+    else mappedData.conversion_timestamp = getTimestampMillis();
 
     if (eventData.search_string) mappedData.search_string = eventData.search_string;
   }
@@ -389,8 +351,79 @@ function addServerEventData(data, eventData, mappedData) {
 }
 
 /*==============================================================================
-  Helpers
+HELPERS
 ==============================================================================*/
+
+function getUrl(eventData) {
+  return eventData.page_location || getRequestHeader('referer') || eventData.page_referrer;
+}
+
+function shouldExitEarly(data, eventData) {
+  if (!isConsentGivenOrNotRequired(data, eventData)) {
+    data.gtmOnSuccess();
+    return true;
+  }
+
+  const url = getUrl(eventData);
+  if (url && url.lastIndexOf('https://gtm-msr.appspot.com/', 0) === 0) {
+    data.gtmOnSuccess();
+    return true;
+  }
+
+  return false;
+}
+
+function isHashed(value) {
+  if (!value) {
+    return false;
+  }
+
+  return makeString(value).match('^[A-Fa-f0-9]{64}$') !== null;
+}
+
+function hashData(value) {
+  if (!value) {
+    return value;
+  }
+
+  const type = getType(value);
+
+  if (type === 'undefined' || value === 'undefined') {
+    return undefined;
+  }
+
+  if (type === 'object') {
+    return value;
+  }
+
+  if (isHashed(value)) {
+    return value;
+  }
+
+  value = makeString(value).trim().toLowerCase();
+
+  return sha256Sync(value, { outputEncoding: 'hex' });
+}
+
+function hashDataIfNeeded(mappedData) {
+  if (mappedData.identifiers) {
+    for (let key in mappedData.identifiers) {
+      if (mappedData.identifiers[key]['hashed_email']) {
+        mappedData.identifiers[key]['hashed_email'] = hashData(
+          mappedData.identifiers[key]['hashed_email']
+        );
+      }
+
+      if (mappedData.identifiers[key]['hashed_phone_number']) {
+        mappedData.identifiers[key]['hashed_phone_number'] = hashData(
+          mappedData.identifiers[key]['hashed_phone_number']
+        );
+      }
+    }
+  }
+
+  return mappedData;
+}
 
 function enc(data) {
   if (['null', 'undefined'].indexOf(getType(data)) !== -1) data = '';
