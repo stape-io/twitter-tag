@@ -3,6 +3,7 @@ const encodeUriComponent = require('encodeUriComponent');
 const getAllEventData = require('getAllEventData');
 const getCookieValues = require('getCookieValues');
 const getRequestHeader = require('getRequestHeader');
+const getTimestampMillis = require('getTimestampMillis');
 const getType = require('getType');
 const JSON = require('JSON');
 const makeInteger = require('makeInteger');
@@ -16,14 +17,20 @@ const sha256Sync = require('sha256Sync');
 /*==============================================================================
 ==============================================================================*/
 
+const API_VERSION = '12';
 const eventData = getAllEventData();
 
-if (shouldExitEarly(data, eventData)) return data.gtmOnSuccess();
+if (shouldExitEarly(data, eventData)) return;
 
-sendRequest();
+const url = getUrl(eventData);
+const twclid = getClickId(url, eventData);
+setClickIdCookie(twclid);
+
+const mappedEventData = mapEvent(data, eventData, twclid);
+sendRequest(data, mappedEventData);
 
 if (data.useOptimisticScenario) {
-  data.gtmOnSuccess();
+  return data.gtmOnSuccess();
 }
 
 /*==============================================================================
@@ -57,11 +64,11 @@ function setClickIdCookie(twclid) {
   setCookie('twclid', twclid, cookieOptions);
 }
 
-function generateXRequestUrl(apiVersion, pixelId) {
-  return 'https://ads-api.x.com/' + apiVersion + '/measurement/conversions/' + pixelId;
-}
+function generateRequestUrl(pixelId, authMethod) {
+  if (authMethod === 'accessToken') {
+    return 'https://ads-api.x.com/' + API_VERSION + '/measurement/conversions/' + enc(pixelId);
+  }
 
-function generateLegacyProxyRequestUrl() {
   const containerIdentifier = getRequestHeader('x-gtm-identifier');
   const defaultDomain = getRequestHeader('x-gtm-default-domain');
   const containerApiKey = getRequestHeader('x-gtm-api-key');
@@ -77,17 +84,7 @@ function generateLegacyProxyRequestUrl() {
   );
 }
 
-function sendRequest() {
-  const url = eventData.page_location || getRequestHeader('referer');
-  const twclid = getClickId(url, eventData);
-  setClickIdCookie(twclid);
-
-  const authMethod = data.hasOwnProperty('authMethod') ? data.authMethod : 'oAuth'; // Backward compatibility.
-  const apiVersion = '12';
-  const postUrl =
-    authMethod === 'accessToken'
-      ? generateXRequestUrl(apiVersion, data.pixelId)
-      : generateLegacyProxyRequestUrl();
+function generateRequestOptions(data, authMethod) {
   const requestOptions = {
     headers: {
       'Content-Type': 'application/json'
@@ -98,15 +95,21 @@ function sendRequest() {
   if (authMethod === 'accessToken') {
     requestOptions.headers['X-Pixel-Token'] = data.pixelAccessToken;
   } else {
-    requestOptions.headers['x-twitter-api-version'] = apiVersion;
+    requestOptions.headers['x-twitter-api-version'] = API_VERSION;
     requestOptions.headers['Authorization'] = 'Bearer ' + data.accessToken;
   }
 
-  const mappedEventData = mapEvent(eventData, data, twclid);
-  const postBody = getPostBody(data, mappedEventData, authMethod);
+  return requestOptions;
+}
+
+function sendRequest(data, mappedEventData) {
+  const authMethod = data.hasOwnProperty('authMethod') ? data.authMethod : 'oAuth'; // Backward compatibility.
+  const requestUrl = generateRequestUrl(data.pixelId, authMethod);
+  const requestOptions = generateRequestOptions(data, authMethod);
+  const requestBody = getPostBody(data, mappedEventData, authMethod);
 
   sendHttpRequest(
-    postUrl,
+    requestUrl,
     (statusCode, headers, body) => {
       if (!data.useOptimisticScenario) {
         const parsedBody = JSON.parse(body || '{}');
@@ -116,14 +119,14 @@ function sendRequest() {
           getType(parsedBody.data) === 'object' &&
           parsedBody.data.conversions_processed
         ) {
-          data.gtmOnSuccess();
+          return data.gtmOnSuccess();
         } else {
-          data.gtmOnFailure();
+          return data.gtmOnFailure();
         }
       }
     },
     requestOptions,
-    JSON.stringify(postBody)
+    JSON.stringify(requestBody)
   );
 }
 
@@ -145,10 +148,10 @@ function getPostBody(data, mappedEventData, authMethod) {
   return postBody;
 }
 
-function mapEvent(eventData, data, twclid) {
+function mapEvent(data, eventData, twclid) {
   let mappedData = {
     event_id: data.eventId,
-    identifiers: []
+    identifiers: {} // It will be transformed into an array in cleanupData().
   };
 
   mappedData = addServerEventData(data, eventData, mappedData);
@@ -164,21 +167,7 @@ function mapEvent(eventData, data, twclid) {
 function overrideDataIfNeeded(data, mappedData) {
   if (data.userDataList) {
     data.userDataList.forEach((d) => {
-      let userDataNotSet = true;
-
-      for (let key in mappedData.identifiers) {
-        if (mappedData.identifiers[key][d.name]) {
-          mappedData.identifiers[key][d.name] = d.value;
-          userDataNotSet = false;
-        }
-      }
-
-      if (userDataNotSet) {
-        let identifier = {};
-        identifier[d.name] = d.value;
-
-        mappedData.identifiers.push(identifier);
-      }
+      mappedData.identifiers[d.name] = d.value;
     });
   }
 
@@ -192,31 +181,21 @@ function overrideDataIfNeeded(data, mappedData) {
 }
 
 function cleanupData(mappedData) {
-  if (mappedData.identifiers) {
-    let userData = [];
+  const ids = mappedData.identifiers;
+  const userData = [];
 
-    for (let userDataKey in mappedData.identifiers) {
-      if (mappedData.identifiers[userDataKey]['hashed_email']) {
-        userData.push({
-          hashed_email: mappedData.identifiers[userDataKey]['hashed_email']
-        });
-      }
+  if (ids.twclid) userData.push({ twclid: ids.twclid });
+  if (ids.hashed_email) userData.push({ hashed_email: ids.hashed_email });
+  if (ids.hashed_phone_number) userData.push({ hashed_phone_number: ids.hashed_phone_number });
 
-      if (mappedData.identifiers[userDataKey]['hashed_phone_number']) {
-        userData.push({
-          hashed_phone_number: mappedData.identifiers[userDataKey]['hashed_phone_number']
-        });
-      }
-
-      if (mappedData.identifiers[userDataKey]['twclid']) {
-        userData.push({
-          twclid: mappedData.identifiers[userDataKey]['twclid']
-        });
-      }
-    }
-
-    mappedData.identifiers = userData;
+  if (ids.ip_address && ids.user_agent) {
+    userData.push({ ip_address: ids.ip_address, user_agent: ids.user_agent });
+  } else if ((ids.ip_address || ids.user_agent) && userData.length) {
+    if (ids.ip_address) userData[0].ip_address = ids.ip_address;
+    if (ids.user_agent) userData[0].user_agent = ids.user_agent;
   }
+
+  mappedData.identifiers = userData;
 
   if (mappedData.value) {
     mappedData.value = makeNumber(mappedData.value);
@@ -315,7 +294,7 @@ function addUserData(data, eventData, mappedData, twclid) {
   const autoMapEnabled = data.hasOwnProperty('autoMapUserData') ? data.autoMapUserData : true;
 
   if (autoMapEnabled) {
-    if (twclid) mappedData.identifiers.push({ twclid: twclid });
+    if (twclid) mappedData.identifiers.twclid = twclid;
 
     const hashedEmail =
       eventData.email ||
@@ -325,7 +304,7 @@ function addUserData(data, eventData, mappedData, twclid) {
       (eventData.user_data && eventData.user_data.email ? eventData.user_data.email : undefined);
 
     if (hashedEmail) {
-      mappedData.identifiers.push({ hashed_email: hashedEmail });
+      mappedData.identifiers.hashed_email = hashedEmail;
     }
 
     const hashedPhoneNumber =
@@ -336,8 +315,14 @@ function addUserData(data, eventData, mappedData, twclid) {
       (eventData.user_data && eventData.user_data.phone ? eventData.user_data.phone : undefined);
 
     if (hashedPhoneNumber) {
-      mappedData.identifiers.push({ hashed_phone_number: hashedPhoneNumber });
+      mappedData.identifiers.hashed_phone_number = hashedPhoneNumber;
     }
+
+    const ip = eventData.ip_override;
+    if (ip) mappedData.identifiers.ip_address = ip;
+
+    const userAgent = eventData.user_agent;
+    if (userAgent) mappedData.identifiers.user_agent = userAgent;
   }
 
   return mappedData;
@@ -357,6 +342,7 @@ function addServerEventData(data, eventData, mappedData) {
     const conversionTime =
       eventData.conversion_time || eventData.conversionTime || eventData.dateISO;
     if (conversionTime) mappedData.conversion_time = conversionTime;
+    else mappedData.conversion_timestamp = getTimestampMillis();
 
     if (eventData.search_string) mappedData.search_string = eventData.search_string;
   }
@@ -368,16 +354,23 @@ function addServerEventData(data, eventData, mappedData) {
 HELPERS
 ==============================================================================*/
 
-function shouldExitEarly() {
-  const url = eventData.page_location || getRequestHeader('referer');
+function getUrl(eventData) {
+  return eventData.page_location || getRequestHeader('referer') || eventData.page_referrer;
+}
 
+function shouldExitEarly(data, eventData) {
   if (!isConsentGivenOrNotRequired(data, eventData)) {
-    return data.gtmOnSuccess();
+    data.gtmOnSuccess();
+    return true;
   }
 
+  const url = getUrl(eventData);
   if (url && url.lastIndexOf('https://gtm-msr.appspot.com/', 0) === 0) {
-    return data.gtmOnSuccess();
+    data.gtmOnSuccess();
+    return true;
   }
+
+  return false;
 }
 
 function isHashed(value) {
