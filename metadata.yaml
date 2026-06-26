@@ -1,8 +1,8 @@
 homepage: 'https://stape.io/'
 documentation: 'https://github.com/stape-io/twitter-tag'
 versions:
-  - sha: 99086ad409c10d62d83e64beaf8325cc7f8b2598
-    changeNotes: Update to v12. Added support to new authentication method.
+  - sha: 15e30340f8232a82199b154e0c39525c3d13fc73
+    changeNotes: Update to v12. Added support to new authentication method. Added IP Address and User Agent support as user identifiers.
   - sha: 251fb97d976e6c32e501948be1611eae988b127d
     changeNotes: Logging removal.
   - sha: a71ed9fb16ec7462e0695d1eb1fd6d9c454e337b
