@@ -1,7 +1,9 @@
+const computeEffectiveTldPlusOne = require('computeEffectiveTldPlusOne');
 const decodeUriComponent = require('decodeUriComponent');
 const encodeUriComponent = require('encodeUriComponent');
 const getAllEventData = require('getAllEventData');
 const getCookieValues = require('getCookieValues');
+const getEventData = require('getEventData');
 const getRequestHeader = require('getRequestHeader');
 const getTimestampMillis = require('getTimestampMillis');
 const getType = require('getType');
@@ -37,27 +39,40 @@ if (data.useOptimisticScenario) {
 VENDOR RELATED FUNCTIONS
 ==============================================================================*/
 
-function getClickId(url, eventData) {
-  let clickId = getCookieValues('twclid')[0] || eventData.twclid;
+function getClickIdFromPixelCookie() {
+  const twclidFromServerCookie = getCookieValues('twclid')[0];
+  if (twclidFromServerCookie) return twclidFromServerCookie;
 
+  const twclidFromJSCookie = getCookieValues('_twclid')[0]; // Pixel
+  if (!twclidFromJSCookie) return undefined;
+
+  const parsed = safeJsonParse(twclidFromJSCookie);
+  if (getType(parsed) === 'object' && parsed.twclid) return parsed.twclid;
+}
+
+function getClickId(url, eventData) {
   if (url) {
     const urlParsed = parseUrl(url);
     if (urlParsed && urlParsed.searchParams.twclid) {
-      clickId = decodeUriComponent(urlParsed.searchParams.twclid);
+      return decodeUriComponent(urlParsed.searchParams.twclid);
     }
   }
-  return clickId;
+
+  return getClickIdFromPixelCookie() || eventData.twclid;
 }
 
 function setClickIdCookie(twclid) {
-  if (!twclid) return;
+  const setClickIdCookieEnabled = data.hasOwnProperty('setClickIdCookie')
+    ? data.setClickIdCookie
+    : true;
+  if (!setClickIdCookieEnabled || !twclid) return;
 
   const cookieOptions = {
-    domain: 'auto',
+    domain: getCookieDomain(data.cookieDomain),
     path: '/',
-    samesite: 'Lax',
+    samesite: data.cookieSameSite || 'Lax',
     secure: true,
-    'max-age': 7776000, // 90 days
+    'max-age': 60 * 60 * 24 * makeInteger(data.cookieExpiration || 390),
     HttpOnly: !!data.useHttpOnlyCookie
   };
 
@@ -112,7 +127,7 @@ function sendRequest(data, mappedEventData) {
     requestUrl,
     (statusCode, headers, body) => {
       if (!data.useOptimisticScenario) {
-        const parsedBody = JSON.parse(body || '{}');
+        const parsedBody = safeJsonParse(body || '{}');
         if (
           statusCode >= 200 &&
           statusCode < 300 &&
@@ -151,7 +166,7 @@ function getPostBody(data, mappedEventData, authMethod) {
 function mapEvent(data, eventData, twclid) {
   let mappedData = {
     event_id: data.eventId,
-    identifiers: {} // It will be transformed into an array in cleanupData().
+    identifiers: [{}]
   };
 
   mappedData = addServerEventData(data, eventData, mappedData);
@@ -167,7 +182,7 @@ function mapEvent(data, eventData, twclid) {
 function overrideDataIfNeeded(data, mappedData) {
   if (data.userDataList) {
     data.userDataList.forEach((d) => {
-      mappedData.identifiers[d.name] = d.value;
+      mappedData.identifiers[0][d.name] = d.value;
     });
   }
 
@@ -181,22 +196,6 @@ function overrideDataIfNeeded(data, mappedData) {
 }
 
 function cleanupData(mappedData) {
-  const ids = mappedData.identifiers;
-  const userData = [];
-
-  if (ids.twclid) userData.push({ twclid: ids.twclid });
-  if (ids.hashed_email) userData.push({ hashed_email: ids.hashed_email });
-  if (ids.hashed_phone_number) userData.push({ hashed_phone_number: ids.hashed_phone_number });
-
-  if (ids.ip_address && ids.user_agent) {
-    userData.push({ ip_address: ids.ip_address, user_agent: ids.user_agent });
-  } else if ((ids.ip_address || ids.user_agent) && userData.length) {
-    if (ids.ip_address) userData[0].ip_address = ids.ip_address;
-    if (ids.user_agent) userData[0].user_agent = ids.user_agent;
-  }
-
-  mappedData.identifiers = userData;
-
   if (mappedData.value) {
     mappedData.value = makeNumber(mappedData.value);
 
@@ -252,7 +251,7 @@ function addEcommerceData(data, eventData, mappedData) {
       items.forEach((d, i) => {
         let content = {};
         const id = d.id || d.item_id;
-        if (id) content.content_id = id;
+        if (id) content.content_id = makeString(id);
 
         const groupId = d.group_id || d.group;
         if (groupId) content.content_group_id = groupId;
@@ -294,35 +293,52 @@ function addUserData(data, eventData, mappedData, twclid) {
   const autoMapEnabled = data.hasOwnProperty('autoMapUserData') ? data.autoMapUserData : true;
 
   if (autoMapEnabled) {
-    if (twclid) mappedData.identifiers.twclid = twclid;
+    const identifier = mappedData.identifiers[0];
 
-    const hashedEmail =
+    if (twclid) identifier.twclid = twclid;
+
+    const twpid = getCookieValues('_twpid')[0];
+    if (twpid) identifier.twpid = twpid;
+
+    const hashedEmail = toValueList(
       eventData.email ||
-      (eventData.user_data && eventData.user_data.email_address
-        ? eventData.user_data.email_address
-        : undefined) ||
-      (eventData.user_data && eventData.user_data.email ? eventData.user_data.email : undefined);
+        (eventData.user_data && eventData.user_data.email_address
+          ? eventData.user_data.email_address
+          : undefined) ||
+        (eventData.user_data && eventData.user_data.email
+          ? eventData.user_data.email
+          : undefined) ||
+        (eventData.user_data && eventData.user_data.sha256_email_address
+          ? eventData.user_data.sha256_email_address
+          : undefined)
+    )[0];
 
     if (hashedEmail) {
-      mappedData.identifiers.hashed_email = hashedEmail;
+      identifier.hashed_email = hashedEmail;
     }
 
-    const hashedPhoneNumber =
+    const hashedPhoneNumber = toValueList(
       eventData.phone ||
-      (eventData.user_data && eventData.user_data.phone_number
-        ? eventData.user_data.phone_number
-        : undefined) ||
-      (eventData.user_data && eventData.user_data.phone ? eventData.user_data.phone : undefined);
+        (eventData.user_data && eventData.user_data.phone_number
+          ? eventData.user_data.phone_number
+          : undefined) ||
+        (eventData.user_data && eventData.user_data.phone
+          ? eventData.user_data.phone
+          : undefined) ||
+        (eventData.user_data && eventData.user_data.sha256_phone_number
+          ? eventData.user_data.sha256_phone_number
+          : undefined)
+    )[0];
 
     if (hashedPhoneNumber) {
-      mappedData.identifiers.hashed_phone_number = hashedPhoneNumber;
+      identifier.hashed_phone_number = hashedPhoneNumber;
     }
 
     const ip = eventData.ip_override;
-    if (ip) mappedData.identifiers.ip_address = ip;
+    if (ip) identifier.ip_address = ip;
 
     const userAgent = eventData.user_agent;
-    if (userAgent) mappedData.identifiers.user_agent = userAgent;
+    if (userAgent) identifier.user_agent = userAgent;
   }
 
   return mappedData;
@@ -334,8 +350,8 @@ function addServerEventData(data, eventData, mappedData) {
     : true;
 
   if (autoMapEnabled) {
-    const transactionId = eventData.transaction_id || eventData.event_id;
-    if (transactionId) mappedData.conversion_id = transactionId;
+    const conversionId = eventData.event_id || eventData.transaction_id;
+    if (conversionId) mappedData.conversion_id = conversionId;
 
     if (eventData.description) mappedData.description = eventData.description;
 
@@ -345,6 +361,8 @@ function addServerEventData(data, eventData, mappedData) {
     else mappedData.conversion_timestamp = getTimestampMillis();
 
     if (eventData.search_string) mappedData.search_string = eventData.search_string;
+
+    if (eventData.page_location) mappedData.event_source_url = eventData.page_location;
   }
 
   return mappedData;
@@ -428,6 +446,31 @@ function hashDataIfNeeded(mappedData) {
 function enc(data) {
   if (['null', 'undefined'].indexOf(getType(data)) !== -1) data = '';
   return encodeUriComponent(makeString(data));
+}
+
+function toValueList(value) {
+  const type = getType(value);
+
+  if (type === 'array') return value.filter((v) => getType(v) === 'string' && v !== '');
+  if (type === 'string' && value !== '') return [value];
+
+  return [];
+}
+
+function safeJsonParse(body) {
+  const firstChar = body.charAt(0);
+  const lastChar = body.charAt(body.length - 1);
+  const looksLikeJson =
+    (firstChar === '{' && lastChar === '}') || (firstChar === '[' && lastChar === ']');
+  if (!looksLikeJson) return body;
+  return JSON.parse(body);
+}
+
+function getCookieDomain(defaultCookieDomain) {
+  return !defaultCookieDomain || defaultCookieDomain === 'auto'
+    ? computeEffectiveTldPlusOne(getEventData('page_location') || getRequestHeader('referer')) ||
+        'auto'
+    : defaultCookieDomain;
 }
 
 function isConsentGivenOrNotRequired(data, eventData) {
