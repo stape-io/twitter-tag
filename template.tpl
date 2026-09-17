@@ -173,17 +173,90 @@ ___TEMPLATE_PARAMETERS___
       },
       {
         "type": "CHECKBOX",
-        "name": "useHttpOnlyCookie",
-        "checkboxText": "Use HttpOnly cookies",
-        "simpleValueType": true,
-        "help": "Forbids JavaScript from accessing the cookie if enabled."
-      },
-      {
-        "type": "CHECKBOX",
         "name": "useOptimisticScenario",
         "checkboxText": "Use Optimistic Scenario",
         "simpleValueType": true,
         "help": "The tag will call gtmOnSuccess() without waiting for a response from the API. This will speed up sGTM response time however your tag will always return the status fired successfully even in case it is not."
+      }
+    ]
+  },
+  {
+    "type": "GROUP",
+    "name": "clickIdCookieSettingsGroup",
+    "displayName": "Click ID Cookie Settings",
+    "groupStyle": "ZIPPY_CLOSED",
+    "subParams": [
+      {
+        "type": "CHECKBOX",
+        "name": "setClickIdCookie",
+        "checkboxText": "Set Click ID cookie",
+        "simpleValueType": true,
+        "defaultValue": true,
+        "help": "If \u003cb\u003efalse\u003c/b\u003e, and if an existing Click ID (\u003ci\u003etwclid\u003c/i\u003e) is found on the sources below, it will still be sent in the request but not stored as a cookie.\n\u003cbr/\u003e\u003cbr/\u003e\nIf \u003cb\u003etrue\u003c/b\u003e, the Click ID will be sent in the request and stored as the \u003ci\u003etwclid\u003c/i\u003e cookie by server GTM.\n\u003cbr/\u003e\u003cbr/\u003e\nThe Click ID is, in this order, sourced from:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003etwclid\u003c/i\u003e URL query parameter\u003c/li\u003e\n\u003cli\u003e\u003ci\u003etwclid\u003c/i\u003e cookie\u003c/li\u003e\n\u003cli\u003e\u003ci\u003etwclid\u003c/i\u003e Event Data parameter\u003c/li\u003e\n\u003c/ul\u003e"
+      },
+      {
+        "type": "SELECT",
+        "name": "cookieSameSite",
+        "displayName": "Cookie SameSite",
+        "macrosInSelect": false,
+        "selectItems": [
+          {
+            "value": "None",
+            "displayValue": "None"
+          },
+          {
+            "value": "Lax",
+            "displayValue": "Lax"
+          },
+          {
+            "value": "Strict",
+            "displayValue": "Strict"
+          }
+        ],
+        "simpleValueType": true,
+        "help": "\u003ca href\u003d\"https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#samesitesamesite-value\"\u003eLearn more\u003c/a\u003e.",
+        "defaultValue": "Lax",
+        "enablingConditions": [
+          {
+            "paramName": "setClickIdCookie",
+            "paramValue": true,
+            "type": "EQUALS"
+          }
+        ]
+      },
+      {
+        "type": "TEXT",
+        "name": "cookieExpiration",
+        "displayName": "Cookie Expiration",
+        "simpleValueType": true,
+        "valueUnit": "days",
+        "defaultValue": 390,
+        "valueValidators": [
+          {
+            "type": "NON_EMPTY"
+          }
+        ],
+        "enablingConditions": [
+          {
+            "paramName": "setClickIdCookie",
+            "paramValue": true,
+            "type": "EQUALS"
+          }
+        ]
+      },
+      {
+        "type": "CHECKBOX",
+        "name": "useHttpOnlyCookie",
+        "checkboxText": "Use HttpOnly cookies",
+        "simpleValueType": true,
+        "help": "If enabled, it forbids JavaScript from accessing the cookie in the browser.",
+        "enablingConditions": [
+          {
+            "paramName": "setClickIdCookie",
+            "paramValue": false,
+            "type": "NOT_EQUALS"
+          }
+        ]
       }
     ]
   },
@@ -203,7 +276,7 @@ ___TEMPLATE_PARAMETERS___
         "name": "autoMapServerEventData",
         "checkboxText": "Automap Server Event Data",
         "simpleValueType": true,
-        "help": "If enabled, the tag will attempt to automatically map parameters from your event data.\n\u003cbr/\u003e\u003cbr/\u003e\nAny value you manually enter in a field below will always override the auto-mapped value.\n\u003cbr/\u003e\u003cbr/\u003e\nDefault mappings:\n\u003cul\u003e\n\u003cli\u003eValue:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData[\u0027x-ga-mp1-ev\u0027]\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData[\u0027x-ga-mp1-tr\u0027]\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.value\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eSum of Price * Quantity from eventData.items[] or eventData.ecommerce.items[]\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eCurrency:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.currency\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.items[0].currency or eventData.ecommerce.items[0].currency\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eNumber Items:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.number_items\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eSum of quantities from eventData.items[] or eventData.ecommerce.items[]\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eContents:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.items[]\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.ecommerce.items[]\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eConversion ID:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.transaction_id\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.event_id\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eDescription:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.description\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eConversion Time (ISO 8601 string format) (It takes precedence over Conversion Timestamp):\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.conversion_time\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.conversionTime\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.dateISO\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eConversion Timestamp (Unix timestamp in milliseconds):\n\u003cul\u003e\n\u003cli\u003eUnix timestamp in milliseconds of when the server tag fired\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eSearch String:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.search_string\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003c/ul\u003e",
+        "help": "If enabled, the tag will attempt to automatically map parameters from your event data.\n\u003cbr/\u003e\u003cbr/\u003e\nAny value you manually enter in a field below will always override the auto-mapped value.\n\u003cbr/\u003e\u003cbr/\u003e\nDefault mappings:\n\u003cul\u003e\n\u003cli\u003eValue:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData[\u0027x-ga-mp1-ev\u0027]\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData[\u0027x-ga-mp1-tr\u0027]\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.value\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eSum of Price * Quantity from eventData.items[] or eventData.ecommerce.items[]\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eCurrency:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.currency\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.items[0].currency or eventData.ecommerce.items[0].currency\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eNumber Items:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.number_items\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eSum of quantities from eventData.items[] or eventData.ecommerce.items[]\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eContents:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.items[]\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.ecommerce.items[]\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eConversion ID:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.event_id\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.transaction_id\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eDescription:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.description\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eConversion Time (ISO 8601 string format) (It takes precedence over Conversion Timestamp):\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.conversion_time\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.conversionTime\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.dateISO\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eConversion Timestamp (Unix timestamp in milliseconds):\n\u003cul\u003e\n\u003cli\u003eUnix timestamp in milliseconds of when the server tag fired\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eSearch String:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.search_string\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eEvent Source URL:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.page_location\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003c/ul\u003e",
         "defaultValue": true
       },
       {
@@ -256,6 +329,10 @@ ___TEMPLATE_PARAMETERS___
               {
                 "value": "search_string",
                 "displayValue": "Search String"
+              },
+              {
+                "value": "event_source_url",
+                "displayValue": "Event Source URL"
               }
             ]
           },
@@ -287,7 +364,7 @@ ___TEMPLATE_PARAMETERS___
         "name": "autoMapUserData",
         "checkboxText": "Automap User Data",
         "simpleValueType": true,
-        "help": "If enabled, the tag will attempt to automatically map parameters from your event data.\n\u003cbr/\u003e\u003cbr/\u003e\nAny value you manually enter in a field below will always override the auto-mapped value.\n\u003cbr/\u003e\u003cbr/\u003e\nDefault mappings:\n\u003cul\u003e\n\u003cli\u003eClick ID (twclid):\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003etwclid cookie\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.twclid\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eURL query parameter twclid\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eEmail:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.email\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.user_data.email_address\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.user_data.email\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003ePhone:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.phone\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.user_data.phone_number\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.user_data.phone\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eUser Agent: eventData.user_agent\u003c/li\u003e\n\u003cli\u003eIP Address: eventData.ip_override\u003c/li\u003e\n\u003c/ul\u003e",
+        "help": "If enabled, the tag will attempt to automatically map parameters from your event data.\n\u003cbr/\u003e\u003cbr/\u003e\nAny value you manually enter in a field below will always override the auto-mapped value.\n\u003cbr/\u003e\u003cbr/\u003e\nDefault mappings:\n\u003cul\u003e\n\u003cli\u003eClick ID (twclid):\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eURL query parameter twclid\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003etwclid cookie\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003e_twclid cookie (set by the X pixel)\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.twclid\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eBrowser ID (twpid):\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003e_twpid cookie (set by the X pixel)\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eEmail:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.email\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.user_data.email_address\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.user_data.email\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.user_data.sha256_email_address\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003ePhone:\n\u003cul\u003e\n\u003cli\u003e\u003ci\u003eeventData.phone\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.user_data.phone_number\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.user_data.phone\u003c/i\u003e\u003c/li\u003e\n\u003cli\u003e\u003ci\u003eeventData.user_data.sha256_phone_number\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/li\u003e\n\u003cli\u003eUser Agent: eventData.user_agent\u003c/li\u003e\n\u003cli\u003eIP Address: eventData.ip_override\u003c/li\u003e\n\u003c/ul\u003e",
         "defaultValue": true
       },
       {
@@ -318,6 +395,10 @@ ___TEMPLATE_PARAMETERS___
                 "displayValue": "Click ID (twclid)"
               },
               {
+                "value": "twpid",
+                "displayValue": "Browser ID (twpid)"
+              },
+              {
                 "value": "ip_address",
                 "displayValue": "IP Address"
               },
@@ -337,7 +418,7 @@ ___TEMPLATE_PARAMETERS___
         "type": "SIMPLE_TABLE",
         "newRowButtonText": "Add property",
         "displayName": "User Data",
-        "help": "\u003cb\u003e⚠️ At least one identifier must always be sent.\u003c/b\u003e\n\u003cbr/\u003e\n\u003cb\u003eIP Address\u003c/b\u003e and \u003cb\u003eUser Agent\u003c/b\u003e require a companion identifier:\n\u003cul\u003e\n\u003cli\u003e\u003cb\u003eIP Address\u003c/b\u003e must be paired with Email, Phone, Click ID (twclid), or User Agent.\u003c/li\u003e\n\u003cli\u003e\u003cb\u003eUser Agent\u003c/b\u003e must be paired with Email, Phone, Click ID (twclid), or IP Address.\u003c/li\u003e\n\u003c/ul\u003e\nIf no valid companion is present, they will be silently dropped from the request."
+        "help": "\u003cb\u003e⚠️  At least one identifier must always be sent.\u003c/b\u003e\n\u003cbr/\u003e\n\u003cb\u003eBrowser ID (twpid)\u003c/b\u003e, \u003cb\u003eIP Address\u003c/b\u003e, and \u003cb\u003eUser Agent\u003c/b\u003e require a companion identifier:\n\u003cul\u003e\n\u003cli\u003e\u003cb\u003eIP Address\u003c/b\u003e must be paired with Click ID (twclid), Email, Phone, Browser ID (twpid), or User Agent.\u003c/li\u003e\n\u003cli\u003e\u003cb\u003eUser Agent\u003c/b\u003e must be paired with Click ID (twclid), Email, Phone, Browser ID (twpid), or IP Address.\u003c/li\u003e\n\u003cli\u003e\u003cb\u003eBrowser ID (twpid)\u003c/b\u003e must be paired with Click ID (twclid), Email, Phone, IP Address, or User Agent.\u003c/li\u003e\n\u003c/ul\u003e"
       }
     ]
   },
@@ -371,10 +452,12 @@ ___TEMPLATE_PARAMETERS___
 
 ___SANDBOXED_JS_FOR_SERVER___
 
+const computeEffectiveTldPlusOne = require('computeEffectiveTldPlusOne');
 const decodeUriComponent = require('decodeUriComponent');
 const encodeUriComponent = require('encodeUriComponent');
 const getAllEventData = require('getAllEventData');
 const getCookieValues = require('getCookieValues');
+const getEventData = require('getEventData');
 const getRequestHeader = require('getRequestHeader');
 const getTimestampMillis = require('getTimestampMillis');
 const getType = require('getType');
@@ -410,27 +493,40 @@ if (data.useOptimisticScenario) {
 VENDOR RELATED FUNCTIONS
 ==============================================================================*/
 
-function getClickId(url, eventData) {
-  let clickId = getCookieValues('twclid')[0] || eventData.twclid;
+function getClickIdFromPixelCookie() {
+  const twclidFromServerCookie = getCookieValues('twclid')[0];
+  if (twclidFromServerCookie) return twclidFromServerCookie;
 
+  const twclidFromJSCookie = getCookieValues('_twclid')[0]; // Pixel
+  if (!twclidFromJSCookie) return undefined;
+
+  const parsed = safeJsonParse(twclidFromJSCookie);
+  if (getType(parsed) === 'object' && parsed.twclid) return parsed.twclid;
+}
+
+function getClickId(url, eventData) {
   if (url) {
     const urlParsed = parseUrl(url);
     if (urlParsed && urlParsed.searchParams.twclid) {
-      clickId = decodeUriComponent(urlParsed.searchParams.twclid);
+      return decodeUriComponent(urlParsed.searchParams.twclid);
     }
   }
-  return clickId;
+
+  return getClickIdFromPixelCookie() || eventData.twclid;
 }
 
 function setClickIdCookie(twclid) {
-  if (!twclid) return;
+  const setClickIdCookieEnabled = data.hasOwnProperty('setClickIdCookie')
+    ? data.setClickIdCookie
+    : true;
+  if (!setClickIdCookieEnabled || !twclid) return;
 
   const cookieOptions = {
-    domain: 'auto',
+    domain: getCookieDomain(data.cookieDomain),
     path: '/',
-    samesite: 'Lax',
+    samesite: data.cookieSameSite || 'Lax',
     secure: true,
-    'max-age': 7776000, // 90 days
+    'max-age': 60 * 60 * 24 * makeInteger(data.cookieExpiration || 390),
     HttpOnly: !!data.useHttpOnlyCookie
   };
 
@@ -485,7 +581,7 @@ function sendRequest(data, mappedEventData) {
     requestUrl,
     (statusCode, headers, body) => {
       if (!data.useOptimisticScenario) {
-        const parsedBody = JSON.parse(body || '{}');
+        const parsedBody = safeJsonParse(body || '{}');
         if (
           statusCode >= 200 &&
           statusCode < 300 &&
@@ -524,7 +620,7 @@ function getPostBody(data, mappedEventData, authMethod) {
 function mapEvent(data, eventData, twclid) {
   let mappedData = {
     event_id: data.eventId,
-    identifiers: {} // It will be transformed into an array in cleanupData().
+    identifiers: [{}]
   };
 
   mappedData = addServerEventData(data, eventData, mappedData);
@@ -540,7 +636,7 @@ function mapEvent(data, eventData, twclid) {
 function overrideDataIfNeeded(data, mappedData) {
   if (data.userDataList) {
     data.userDataList.forEach((d) => {
-      mappedData.identifiers[d.name] = d.value;
+      mappedData.identifiers[0][d.name] = d.value;
     });
   }
 
@@ -554,22 +650,6 @@ function overrideDataIfNeeded(data, mappedData) {
 }
 
 function cleanupData(mappedData) {
-  const ids = mappedData.identifiers;
-  const userData = [];
-
-  if (ids.twclid) userData.push({ twclid: ids.twclid });
-  if (ids.hashed_email) userData.push({ hashed_email: ids.hashed_email });
-  if (ids.hashed_phone_number) userData.push({ hashed_phone_number: ids.hashed_phone_number });
-
-  if (ids.ip_address && ids.user_agent) {
-    userData.push({ ip_address: ids.ip_address, user_agent: ids.user_agent });
-  } else if ((ids.ip_address || ids.user_agent) && userData.length) {
-    if (ids.ip_address) userData[0].ip_address = ids.ip_address;
-    if (ids.user_agent) userData[0].user_agent = ids.user_agent;
-  }
-
-  mappedData.identifiers = userData;
-
   if (mappedData.value) {
     mappedData.value = makeNumber(mappedData.value);
 
@@ -625,7 +705,7 @@ function addEcommerceData(data, eventData, mappedData) {
       items.forEach((d, i) => {
         let content = {};
         const id = d.id || d.item_id;
-        if (id) content.content_id = id;
+        if (id) content.content_id = makeString(id);
 
         const groupId = d.group_id || d.group;
         if (groupId) content.content_group_id = groupId;
@@ -667,35 +747,52 @@ function addUserData(data, eventData, mappedData, twclid) {
   const autoMapEnabled = data.hasOwnProperty('autoMapUserData') ? data.autoMapUserData : true;
 
   if (autoMapEnabled) {
-    if (twclid) mappedData.identifiers.twclid = twclid;
+    const identifier = mappedData.identifiers[0];
 
-    const hashedEmail =
+    if (twclid) identifier.twclid = twclid;
+
+    const twpid = getCookieValues('_twpid')[0];
+    if (twpid) identifier.twpid = twpid;
+
+    const hashedEmail = toValueList(
       eventData.email ||
-      (eventData.user_data && eventData.user_data.email_address
-        ? eventData.user_data.email_address
-        : undefined) ||
-      (eventData.user_data && eventData.user_data.email ? eventData.user_data.email : undefined);
+        (eventData.user_data && eventData.user_data.email_address
+          ? eventData.user_data.email_address
+          : undefined) ||
+        (eventData.user_data && eventData.user_data.email
+          ? eventData.user_data.email
+          : undefined) ||
+        (eventData.user_data && eventData.user_data.sha256_email_address
+          ? eventData.user_data.sha256_email_address
+          : undefined)
+    )[0];
 
     if (hashedEmail) {
-      mappedData.identifiers.hashed_email = hashedEmail;
+      identifier.hashed_email = hashedEmail;
     }
 
-    const hashedPhoneNumber =
+    const hashedPhoneNumber = toValueList(
       eventData.phone ||
-      (eventData.user_data && eventData.user_data.phone_number
-        ? eventData.user_data.phone_number
-        : undefined) ||
-      (eventData.user_data && eventData.user_data.phone ? eventData.user_data.phone : undefined);
+        (eventData.user_data && eventData.user_data.phone_number
+          ? eventData.user_data.phone_number
+          : undefined) ||
+        (eventData.user_data && eventData.user_data.phone
+          ? eventData.user_data.phone
+          : undefined) ||
+        (eventData.user_data && eventData.user_data.sha256_phone_number
+          ? eventData.user_data.sha256_phone_number
+          : undefined)
+    )[0];
 
     if (hashedPhoneNumber) {
-      mappedData.identifiers.hashed_phone_number = hashedPhoneNumber;
+      identifier.hashed_phone_number = hashedPhoneNumber;
     }
 
     const ip = eventData.ip_override;
-    if (ip) mappedData.identifiers.ip_address = ip;
+    if (ip) identifier.ip_address = ip;
 
     const userAgent = eventData.user_agent;
-    if (userAgent) mappedData.identifiers.user_agent = userAgent;
+    if (userAgent) identifier.user_agent = userAgent;
   }
 
   return mappedData;
@@ -707,8 +804,8 @@ function addServerEventData(data, eventData, mappedData) {
     : true;
 
   if (autoMapEnabled) {
-    const transactionId = eventData.transaction_id || eventData.event_id;
-    if (transactionId) mappedData.conversion_id = transactionId;
+    const conversionId = eventData.event_id || eventData.transaction_id;
+    if (conversionId) mappedData.conversion_id = conversionId;
 
     if (eventData.description) mappedData.description = eventData.description;
 
@@ -718,6 +815,8 @@ function addServerEventData(data, eventData, mappedData) {
     else mappedData.conversion_timestamp = getTimestampMillis();
 
     if (eventData.search_string) mappedData.search_string = eventData.search_string;
+
+    if (eventData.page_location) mappedData.event_source_url = eventData.page_location;
   }
 
   return mappedData;
@@ -801,6 +900,31 @@ function hashDataIfNeeded(mappedData) {
 function enc(data) {
   if (['null', 'undefined'].indexOf(getType(data)) !== -1) data = '';
   return encodeUriComponent(makeString(data));
+}
+
+function toValueList(value) {
+  const type = getType(value);
+
+  if (type === 'array') return value.filter((v) => getType(v) === 'string' && v !== '');
+  if (type === 'string' && value !== '') return [value];
+
+  return [];
+}
+
+function safeJsonParse(body) {
+  const firstChar = body.charAt(0);
+  const lastChar = body.charAt(body.length - 1);
+  const looksLikeJson =
+    (firstChar === '{' && lastChar === '}') || (firstChar === '[' && lastChar === ']');
+  if (!looksLikeJson) return body;
+  return JSON.parse(body);
+}
+
+function getCookieDomain(defaultCookieDomain) {
+  return !defaultCookieDomain || defaultCookieDomain === 'auto'
+    ? computeEffectiveTldPlusOne(getEventData('page_location') || getRequestHeader('referer')) ||
+        'auto'
+    : defaultCookieDomain;
 }
 
 function isConsentGivenOrNotRequired(data, eventData) {
@@ -946,6 +1070,14 @@ ___SERVER_PERMISSIONS___
               {
                 "type": 1,
                 "string": "twclid"
+              },
+              {
+                "type": 1,
+                "string": "_twclid"
+              },
+              {
+                "type": 1,
+                "string": "_twpid"
               }
             ]
           }
@@ -1093,10 +1225,815 @@ ___SERVER_PERMISSIONS___
 
 ___TESTS___
 
-scenarios: []
+scenarios:
+- name: '[Consent] Denied required consent skips the request'
+  code: |-
+    mock('getAllEventData', () => ({ event_name: 'purchase' }));
+
+    let requestSent = false;
+    mock('sendHttpRequest', () => {
+      requestSent = true;
+    });
+
+    const mockData = createMockData({ adStorageConsent: 'required' });
+    runCode(mockData);
+
+    assertThat(requestSent).isFalse();
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Consent] Granted required consent via consent_state sends the request'
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      consent_state: { ad_storage: true }
+    }));
+    mockSuccessResponse();
+
+    const mockData = createMockData({ adStorageConsent: 'required' });
+    runCode(mockData);
+
+    assertApi('sendHttpRequest').wasCalled();
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Consent] Granted required consent via x-ga-gcs sends the request'
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      'x-ga-gcs': 'G111'
+    }));
+    mockSuccessResponse();
+
+    const mockData = createMockData({ adStorageConsent: 'required' });
+    runCode(mockData);
+
+    assertApi('sendHttpRequest').wasCalled();
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Consent] Skips request for GTM preview debug URL'
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      page_location: 'https://gtm-msr.appspot.com/preview'
+    }));
+
+    let requestSent = false;
+    mock('sendHttpRequest', () => {
+      requestSent = true;
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    assertThat(requestSent).isFalse();
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Sends all identifiers as a single object in a one item array
+  code: |-
+    mock('getCookieValues', (name) => (name === '_twpid' ? ['browser-id-123'] : []));
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      page_location: 'https://www.example.com/checkout?twclid=urlclid',
+      user_data: { email_address: 'test@test.com', phone_number: '11111111111' },
+      ip_override: '192.0.2.1',
+      user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'
+    }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    const conversion = JSON.parse(requestBody).conversions[0];
+    assertThat(conversion.identifiers).isArray();
+    assertThat(conversion.identifiers).hasLength(1);
+    assertThat(conversion.identifiers[0]).isEqualTo({
+      twclid: 'urlclid',
+      twpid: 'browser-id-123',
+      hashed_email: sha256Sync('test@test.com', { outputEncoding: 'hex' }),
+      hashed_phone_number: sha256Sync('11111111111', { outputEncoding: 'hex' }),
+      ip_address: '192.0.2.1',
+      user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'
+    });
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Maps sha256_email_address and sha256_phone_number from user data
+  code: |-
+    const hashedEmail = sha256Sync('already-hashed@test.com', { outputEncoding: 'hex' });
+    const hashedPhone = sha256Sync('22222222222', { outputEncoding: 'hex' });
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      user_data: {
+        sha256_email_address: hashedEmail,
+        sha256_phone_number: hashedPhone
+      }
+    }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    const identifier = JSON.parse(requestBody).conversions[0].identifiers[0];
+    assertThat(identifier.hashed_email).isEqualTo(hashedEmail);
+    assertThat(identifier.hashed_phone_number).isEqualTo(hashedPhone);
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Uses the first email and phone when eventData provides an array
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      user_data: {
+        email_address: ['first@test.com', 'second@test.com'],
+        phone_number: ['11111111111', '22222222222']
+      }
+    }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    const identifier = JSON.parse(requestBody).conversions[0].identifiers[0];
+    assertThat(identifier.hashed_email).isEqualTo(sha256Sync('first@test.com', { outputEncoding: 'hex' }));
+    assertThat(identifier.hashed_phone_number).isEqualTo(sha256Sync('11111111111', { outputEncoding: 'hex' }));
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Ignores an empty array for email and phone
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      user_agent: 'UA',
+      user_data: {
+        email_address: [],
+        phone_number: []
+      }
+    }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    const identifier = JSON.parse(requestBody).conversions[0].identifiers[0];
+    assertThat(identifier.hashed_email).isUndefined();
+    assertThat(identifier.hashed_phone_number).isUndefined();
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Hashes plain email and phone but leaves already hashed values untouched
+  code: |-
+    const alreadyHashedPhone = sha256Sync('11111111111', { outputEncoding: 'hex' });
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      email: '  Test@TEST.com  ',
+      phone: alreadyHashedPhone
+    }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    const identifier = JSON.parse(requestBody).conversions[0].identifiers[0];
+    assertThat(identifier.hashed_email).isEqualTo(sha256Sync('test@test.com', { outputEncoding: 'hex' }));
+    assertThat(identifier.hashed_phone_number).isEqualTo(alreadyHashedPhone);
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Maps event_source_url from page_location
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      page_location: 'https://www.example.com/checkout',
+      user_agent: 'UA'
+    }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    const conversion = JSON.parse(requestBody).conversions[0];
+    assertThat(conversion.event_source_url).isEqualTo('https://www.example.com/checkout');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Server Event Data Override replaces the auto mapped values
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      page_location: 'https://www.example.com/checkout',
+      event_id: 'auto-conversion-id',
+      user_agent: 'UA'
+    }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData({
+      serverEventDataList: [
+        { name: 'event_source_url', value: 'https://override.example.com/' },
+        { name: 'conversion_id', value: 'override-conversion-id' }
+      ]
+    });
+    runCode(mockData);
+
+    const conversion = JSON.parse(requestBody).conversions[0];
+    assertThat(conversion.event_source_url).isEqualTo('https://override.example.com/');
+    assertThat(conversion.conversion_id).isEqualTo('override-conversion-id');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: User Data Override replaces the auto mapped identifiers
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      user_data: { email_address: 'auto@test.com' }
+    }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData({
+      userDataList: [{ name: 'hashed_email', value: 'override@test.com' }]
+    });
+    runCode(mockData);
+
+    const identifier = JSON.parse(requestBody).conversions[0].identifiers[0];
+    assertThat(identifier.hashed_email).isEqualTo(sha256Sync('override@test.com', { outputEncoding: 'hex' }));
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Falls back to transaction_id when event_id is missing
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      transaction_id: 'T_12345',
+      user_agent: 'UA'
+    }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    const conversion = JSON.parse(requestBody).conversions[0];
+    assertThat(conversion.conversion_id).isEqualTo('T_12345');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Uses conversion_time when provided else falls back to a timestamp
+  code: |-
+    [
+      { eventData: { event_name: 'purchase', conversion_time: '2024-06-01T12:34:56.000Z' }, expectTime: true },
+      { eventData: { event_name: 'purchase' }, expectTime: false }
+    ].forEach((scenario) => {
+      cleanup();
+      mock('getAllEventData', () => scenario.eventData);
+
+      let requestBody;
+      mock('sendHttpRequest', (url, callback, options, body) => {
+        requestBody = body;
+        callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+      });
+
+      const mockData = createMockData();
+      runCode(mockData);
+
+      const conversion = JSON.parse(requestBody).conversions[0];
+      if (scenario.expectTime) {
+        assertThat(conversion.conversion_time).isEqualTo('2024-06-01T12:34:56.000Z');
+        assertThat(conversion.conversion_timestamp).isUndefined();
+      } else {
+        assertThat(conversion.conversion_time).isUndefined();
+        assertThat(conversion.conversion_timestamp).isEqualTo(1717245296000);
+      }
+      assertApi('gtmOnSuccess').wasCalled();
+      assertApi('gtmOnFailure').wasNotCalled();
+    });
+- name: Maps ecommerce items and converts numeric content_id to a string
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      user_agent: 'UA',
+      items: [{ id: 12345, name: 'Widget', price: 9.5, quantity: 2 }]
+    }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    const conversion = JSON.parse(requestBody).conversions[0];
+    assertThat(conversion.contents[0].content_id).isStrictlyEqualTo('12345');
+    assertThat(conversion.number_items).isEqualTo(2);
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Falls back to ecommerce items when the items field is missing
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      user_agent: 'UA',
+      ecommerce: { items: [{ item_id: 'SKU-1', item_name: 'Shoe', price: 10, quantity: 1 }] }
+    }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    const conversion = JSON.parse(requestBody).conversions[0];
+    assertThat(conversion.contents[0].content_id).isStrictlyEqualTo('SKU-1');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Derives value and currency from GA4 mp1 parameters
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      user_agent: 'UA',
+      'x-ga-mp1-ev': 42,
+      currency: 'usd'
+    }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    const conversion = JSON.parse(requestBody).conversions[0];
+    assertThat(conversion.value).isEqualTo('42.00');
+    assertThat(conversion.price_currency).isEqualTo('usd');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Formats value and content_price with two decimal places
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      user_agent: 'UA',
+      value: 49,
+      items: [{ item_id: 'SKU-1', price: 10 }]
+    }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    const conversion = JSON.parse(requestBody).conversions[0];
+    assertThat(conversion.value).isEqualTo('49.00');
+    assertThat(conversion.contents[0].content_price).isEqualTo('10.00');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Resolves the Click ID with URL taking priority over cookie and event data
+  code: |-
+    [
+      { url: undefined, cookie: 'cookieclid', eventTwclid: 'eventclid', expected: 'cookieclid' },
+      { url: undefined, cookie: undefined, eventTwclid: 'eventclid', expected: 'eventclid' },
+      {
+        url: 'https://www.example.com/?twclid=urlclid',
+        cookie: 'cookieclid',
+        eventTwclid: 'eventclid',
+        expected: 'urlclid'
+      }
+    ].forEach((scenario) => {
+      cleanup();
+      mock('getCookieValues', (name) => (name === 'twclid' && scenario.cookie ? [scenario.cookie] : []));
+      mock('getAllEventData', () => ({
+        event_name: 'purchase',
+        page_location: scenario.url,
+        twclid: scenario.eventTwclid,
+        user_agent: 'UA'
+      }));
+
+      let requestBody;
+      mock('sendHttpRequest', (url, callback, options, body) => {
+        requestBody = body;
+        callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+      });
+
+      const mockData = createMockData();
+      runCode(mockData);
+
+      const identifier = JSON.parse(requestBody).conversions[0].identifiers[0];
+      assertThat(identifier.twclid).isEqualTo(scenario.expected);
+      assertApi('gtmOnSuccess').wasCalled();
+      assertApi('gtmOnFailure').wasNotCalled();
+    });
+- name: '[Click ID Cookie] Is stored with a 390 day expiration by default'
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      page_location: 'https://www.example.com/?twclid=urlclid',
+      user_agent: 'UA'
+    }));
+    mockSuccessResponse();
+
+    let cookieName, cookieValue, cookieOptions;
+    mock('setCookie', (name, value, options) => {
+      cookieName = name;
+      cookieValue = value;
+      cookieOptions = options;
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    assertThat(cookieName).isEqualTo('twclid');
+    assertThat(cookieValue).isEqualTo('urlclid');
+    assertThat(cookieOptions['max-age']).isEqualTo(60 * 60 * 24 * 390);
+    assertThat(cookieOptions.samesite).isEqualTo('Lax');
+    assertThat(cookieOptions.domain).isEqualTo('auto');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Click ID Cookie] Is not stored when setClickIdCookie is false but is still
+    sent'
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      page_location: 'https://www.example.com/?twclid=urlclid',
+      user_agent: 'UA'
+    }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    let setCookieCalled = false;
+    mock('setCookie', () => {
+      setCookieCalled = true;
+    });
+
+    const mockData = createMockData({ setClickIdCookie: false });
+    runCode(mockData);
+
+    assertThat(setCookieCalled).isFalse();
+    const identifier = JSON.parse(requestBody).conversions[0].identifiers[0];
+    assertThat(identifier.twclid).isEqualTo('urlclid');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Click ID Cookie] Honors custom SameSite and Expiration settings'
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      page_location: 'https://www.example.com/?twclid=urlclid',
+      user_agent: 'UA'
+    }));
+    mockSuccessResponse();
+
+    let cookieOptions;
+    mock('setCookie', (name, value, options) => {
+      cookieOptions = options;
+    });
+
+    const mockData = createMockData({ cookieSameSite: 'Strict', cookieExpiration: 7 });
+    runCode(mockData);
+
+    assertThat(cookieOptions.samesite).isEqualTo('Strict');
+    assertThat(cookieOptions['max-age']).isEqualTo(60 * 60 * 24 * 7);
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Click ID Cookie] Domain falls back to computeEffectiveTldPlusOne'
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      page_location: 'https://www.example.com/?twclid=urlclid',
+      user_agent: 'UA'
+    }));
+    mockSuccessResponse();
+    mock('computeEffectiveTldPlusOne', () => 'example.com');
+
+    let cookieOptions;
+    mock('setCookie', (name, value, options) => {
+      cookieOptions = options;
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    assertThat(cookieOptions.domain).isEqualTo('example.com');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Disabling autoMapUserData and autoMapServerEventData skips auto mapped fields
+  code: |-
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      page_location: 'https://www.example.com/checkout',
+      user_data: { email_address: 'test@test.com' },
+      user_agent: 'UA'
+    }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData({ autoMapUserData: false, autoMapServerEventData: false });
+    runCode(mockData);
+
+    const conversion = JSON.parse(requestBody).conversions[0];
+    assertThat(conversion.event_source_url).isUndefined();
+    assertThat(conversion.conversion_timestamp).isUndefined();
+    assertThat(conversion.identifiers[0]).isEqualTo({});
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Builds the request with the Access Token auth method
+  code: |-
+    mock('getAllEventData', () => ({ event_name: 'purchase', user_agent: 'UA' }));
+
+    let requestUrl, requestOptions;
+    mock('sendHttpRequest', (url, callback, options) => {
+      requestUrl = url;
+      requestOptions = options;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData({ authMethod: 'accessToken', pixelAccessToken: 'my-access-token' });
+    runCode(mockData);
+
+    assertThat(requestUrl).isEqualTo('https://ads-api.x.com/12/measurement/conversions/pixel123');
+    assertThat(requestOptions.headers['X-Pixel-Token']).isEqualTo('my-access-token');
+    assertThat(requestOptions.headers['x-twitter-api-version']).isUndefined();
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Builds the request body auth object with the OAuth auth method
+  code: |-
+    mock('getAllEventData', () => ({ event_name: 'purchase', user_agent: 'UA' }));
+    mock('getRequestHeader', (name) => {
+      if (name === 'x-gtm-identifier') return 'container123';
+      if (name === 'x-gtm-default-domain') return 'stape.io';
+      if (name === 'x-gtm-api-key') return 'apikey123';
+      return undefined;
+    });
+
+    let requestUrl, requestOptions, requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestUrl = url;
+      requestOptions = options;
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData({
+      authMethod: 'oAuth',
+      consumerKey: 'ck',
+      consumerSecret: 'cs',
+      oauthToken: 'ot',
+      oauthTokenSecret: 'ots'
+    });
+    runCode(mockData);
+
+    assertThat(requestUrl).isEqualTo('https://container123.stape.io/stape-api/apikey123/v1/twitter/auth-proxy');
+    assertThat(requestOptions.headers['x-twitter-api-version']).isEqualTo('12');
+    assertThat(requestOptions.headers['X-Pixel-Token']).isUndefined();
+
+    const parsedBody = JSON.parse(requestBody);
+    assertThat(parsedBody.auth.consumer_key).isEqualTo('ck');
+    assertThat(parsedBody.auth.consumer_secret).isEqualTo('cs');
+    assertThat(parsedBody.auth.oauth_token).isEqualTo('ot');
+    assertThat(parsedBody.auth.oauth_token_secret).isEqualTo('ots');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Routes through the Stape auth proxy when authMethod is not set
+  code: |-
+    mock('getAllEventData', () => ({ event_name: 'purchase', user_agent: 'UA' }));
+    mock('getRequestHeader', (name) => {
+      if (name === 'x-gtm-identifier') return 'container123';
+      if (name === 'x-gtm-default-domain') return 'stape.io';
+      if (name === 'x-gtm-api-key') return 'apikey123';
+      return undefined;
+    });
+
+    let requestUrl;
+    mock('sendHttpRequest', (url, callback) => {
+      requestUrl = url;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = {
+      pixelId: 'pixel123',
+      eventId: 'tw-abc123-xxxxx',
+      consumerKey: 'ck',
+      consumerSecret: 'cs',
+      oauthToken: 'ot',
+      oauthTokenSecret: 'ots'
+    };
+    runCode(mockData);
+
+    assertThat(requestUrl).isEqualTo('https://container123.stape.io/stape-api/apikey123/v1/twitter/auth-proxy');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Calls failure when the API response is missing conversions_processed
+  code: |-
+    mock('getAllEventData', () => ({ event_name: 'purchase', user_agent: 'UA' }));
+    mock('sendHttpRequest', (url, callback) => {
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 0 } }));
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    assertApi('gtmOnFailure').wasCalled();
+    assertApi('gtmOnSuccess').wasNotCalled();
+- name: Calls failure on a non 2xx response status
+  code: |-
+    mock('getAllEventData', () => ({ event_name: 'purchase', user_agent: 'UA' }));
+    mock('sendHttpRequest', (url, callback) => {
+      callback(500, {}, JSON.stringify({ errors: ['bad request'] }));
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    assertApi('gtmOnFailure').wasCalled();
+    assertApi('gtmOnSuccess').wasNotCalled();
+- name: Optimistic Scenario calls success immediately without waiting for a response
+  code: |-
+    mock('getAllEventData', () => ({ event_name: 'purchase', user_agent: 'UA' }));
+    mock('sendHttpRequest', () => {});
+
+    const mockData = createMockData({ useOptimisticScenario: true });
+    runCode(mockData);
+
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Maps twpid from the _twpid cookie
+  code: |-
+    mock('getCookieValues', (name) => (name === '_twpid' ? ['browser-id-123'] : []));
+    mock('getAllEventData', () => ({ event_name: 'purchase', user_agent: 'UA' }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    const identifier = JSON.parse(requestBody).conversions[0].identifiers[0];
+    assertThat(identifier.twpid).isEqualTo('browser-id-123');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: Reads twclid from the _twclid pixel cookie when no other source is present
+  code: |-
+    const pixelCookie = JSON.stringify({
+      pixelVersion: '2.4.10',
+      timestamp: '1789646055812',
+      twclid: '1111111111111111',
+      source: 1
+    });
+    mock('getCookieValues', (name) => (name === '_twclid' ? [pixelCookie] : []));
+    mock('getAllEventData', () => ({ event_name: 'purchase', user_agent: 'UA' }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    const identifier = JSON.parse(requestBody).conversions[0].identifiers[0];
+    assertThat(identifier.twclid).isEqualTo('1111111111111111');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[safeJsonParse] The twclid cookie takes priority over the pixel cookie'
+  code: |-
+    const pixelCookie = JSON.stringify({ twclid: 'pixel-clid' });
+    mock('getCookieValues', (name) => {
+      if (name === 'twclid') return ['first-party-clid'];
+      if (name === '_twclid') return [pixelCookie];
+      return [];
+    });
+    mock('getAllEventData', () => ({ event_name: 'purchase', user_agent: 'UA' }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    const identifier = JSON.parse(requestBody).conversions[0].identifiers[0];
+    assertThat(identifier.twclid).isEqualTo('first-party-clid');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[safeJsonParse] Malformed pixel cookie falls back to event data twclid'
+  code: |-
+    mock('getCookieValues', (name) => (name === '_twclid' ? ['not-json'] : []));
+    mock('getAllEventData', () => ({
+      event_name: 'purchase',
+      user_agent: 'UA',
+      twclid: 'event-data-clid'
+    }));
+
+    let requestBody;
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      requestBody = body;
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+
+    const mockData = createMockData();
+    runCode(mockData);
+
+    const identifier = JSON.parse(requestBody).conversions[0].identifiers[0];
+    assertThat(identifier.twclid).isEqualTo('event-data-clid');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+setup: |-
+  const JSON = require('JSON');
+  const sha256Sync = require('sha256Sync');
+
+  const cleanup = () => {
+    mock('getAllEventData', () => ({}));
+    mock('getCookieValues', () => []);
+    mock('getRequestHeader', () => undefined);
+    mock('getTimestampMillis', () => 1717245296000);
+    mock('computeEffectiveTldPlusOne', () => undefined);
+    mock('setCookie', () => {});
+  };
+
+  cleanup();
+
+  const baseMockData = {
+    pixelId: 'pixel123',
+    authMethod: 'accessToken',
+    pixelAccessToken: 'token123',
+    eventId: 'tw-abc123-xxxxx'
+  };
+
+  const createMockData = (overrides) => {
+    const copy = {};
+    for (let key in baseMockData) copy[key] = baseMockData[key];
+    for (let key in overrides || {}) copy[key] = overrides[key];
+    return copy;
+  };
+
+  const mockSuccessResponse = () => {
+    mock('sendHttpRequest', (url, callback) => {
+      callback(200, {}, JSON.stringify({ data: { conversions_processed: 1 } }));
+    });
+  };
 
 
 ___NOTES___
+
+2026-09-17 Change Notes:
+ - Added Event Source URL auto-mapping from page_location, with a Server Event Data Override entry.
+ - Added sha256_email_address/sha256_phone_number auto-mapping for Email/Phone, and use the first value when the incoming email or phone is an array.
+ - Content ID is now always sent as a string.
+ - Added a Set Click ID cookie toggle (on by default) with configurable SameSite and Expiration (default 390 days), and recover twclid/twpid from the cookies set by the X pixel (_twclid/_twpid) in addition to existing sources.
+ - All user identifiers are now built and sent as a single object per conversion, matching the current X Ads API format.
 
 2026-06-18 Change Notes:
  - Version bump (12).
@@ -1107,3 +2044,4 @@ ___NOTES___
  - Logging removal.
 
 Created on 18/08/2022, 12:25:26
+

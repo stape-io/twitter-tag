@@ -9,7 +9,8 @@ The **X (Twitter) Conversion API Tag** for Google Tag Manager Server-Side allows
 - **OAuth Authentication**: Legacy OAuth 1.0a authentication is still supported but will be removed in December 2026. Migrate to Access Token.
 - **Flexible Data Mapping**: Allows overriding server event data and adding specific user data.
 - **Automatic Data Hashing**: Automatically hashes user data like email and phone numbers using SHA-256 if they are not already hashed.
-- **Cookie Management**: Supports HttpOnly cookies for security.
+- **Cookie Management**: Optionally persists the Click ID (`twclid`) as a first-party cookie, with configurable expiration, SameSite and HttpOnly settings.
+- **Click ID and Browser ID Recovery**: Reads the `twclid` Click ID from the URL, first-party cookie, the X pixel's own `_twclid` cookie, or the event data, and reads the `twpid` Browser ID from the `_twpid` cookie set by the X pixel.
 
 ## Installation
 
@@ -40,11 +41,19 @@ The **X (Twitter) Conversion API Tag** for Google Tag Manager Server-Side allows
 
 > ⚠️ **OAuth authentication will be removed in December 2026.** If you are currently using OAuth, migrate to the Access Token method.
 
+### Click ID Cookie Settings
+
+| Parameter | Description |
+| :--- | :--- |
+| **Set Click ID cookie** | Enabled by default. When enabled, a `twclid` found on the URL is persisted as a first-party cookie so it can be reused on subsequent hits. When disabled, an existing Click ID is still sent with the event, just not stored. |
+| **Cookie SameSite** | `None`, `Lax` (default), or `Strict`. |
+| **Cookie Expiration** | Cookie lifetime in days. Defaults to `390`. |
+
 ### Server Event Data Parameters
 
 | Parameter | Description |
 | :--- | :--- |
-| **Server Event Data Override** | Manually override or add server event data parameters. Available properties: `Conversion Time`, `Number Items`, `Currency`, `Value`, `Conversion ID`, `Description`, `Contents`, `Search String`. |
+| **Server Event Data Override** | Manually override or add server event data parameters. Available properties: `Conversion Time`, `Conversion Timestamp`, `Number Items`, `Currency`, `Value`, `Conversion ID`, `Description`, `Contents`, `Search String`, `Event Source URL`. |
 
 See [this documentation](https://docs.x.com/x-ads-api/measurement/web-conversions) for more details on what data parameters you can override.
 
@@ -52,13 +61,11 @@ See [this documentation](https://docs.x.com/x-ads-api/measurement/web-conversion
 
 | Parameter | Description |
 | :--- | :--- |
-| **User Data** | Manually add user identifiers. Supported types: `Email`, `Phone`, `Click ID (twclid)`, `IP Address`, and `User Agent`. |
+| **User Data** | Manually add user identifiers. Supported types: `Email`, `Phone`, `Click ID (twclid)`, `Browser ID (twpid)`, `IP Address`, and `User Agent`. All identifiers are sent to X as a single object. |
 
-**Important pairing rules for IP Address and User Agent:**
-- At least one identifier must always be sent.
-- **IP Address** must be paired with Email, Phone, Click ID (twclid), or User Agent.
-- **User Agent** must be paired with Email, Phone, Click ID (twclid), or IP Address.
-- If neither a valid companion is present, IP Address and User Agent will be silently dropped from the request.
+At least one identifier must always be sent. **Browser ID (twpid)**, **IP Address**, and **User Agent** each require a companion identifier (Click ID, Email, Phone, or one of the others in that group).
+
+If the automapped email or phone number from your event data is an array (e.g. `user_data.email_address: ["a@test.com", "b@test.com"]`), the tag uses the first value in the array.
 
 See [this documentation](https://docs.x.com/x-ads-api/measurement/web-conversions) for more details on what user data parameters you can add to the call. If the documentation requires the parameter to be hashed, you **must** hash it with SHA256, or the tag will do this automatically before sending the event to Twitter.
 
