@@ -1,6 +1,8 @@
 homepage: 'https://stape.io/'
 documentation: 'https://github.com/stape-io/twitter-tag'
 versions:
+  - sha: 6099a1c1746af4a4e1ad1e3192ee7959e204feb5
+    changeNotes: Added Event Source URL, sha256 email/phone mapping, Click ID cookie toggle, and X pixel identifier recovery (twclid/twpid).
   - sha: 15e30340f8232a82199b154e0c39525c3d13fc73
     changeNotes: Update to v12. Added support to new authentication method. Added IP Address and User Agent support as user identifiers.
   - sha: 251fb97d976e6c32e501948be1611eae988b127d
